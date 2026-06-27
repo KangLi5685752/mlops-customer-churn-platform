@@ -31,7 +31,7 @@ Create the baseline notebook or script for the Telco Customer Churn dataset, inc
 
 The project has been initialized as a portfolio-grade MLOps prototype for Telco customer churn prediction. The current repository state defines the MVP boundary, dataset decision, planned engineering components and responsible-use framing. No model, API, Docker, CI, MLflow or dashboard implementation has been added yet.
 
-## Evidence to Collect Later for CV / README / LinkedIn
+## Project Evidence and Validation Artifacts to Collect
 
 - Held-out model evaluation metrics.
 - Before/after comparison between baseline notebook workflow and refactored MLOps workflow.
@@ -44,3 +44,7 @@ The project has been initialized as a portfolio-grade MLOps prototype for Telco 
 - Simulated drift detection output.
 - Streamlit monitoring dashboard screenshot.
 - Final model card and risk register content.
+
+## Milestone Log
+
+- 2026-06-26: Initialized repository structure, documentation templates and MVP scope for the Telco churn MLOps project.
