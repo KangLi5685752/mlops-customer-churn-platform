@@ -29,8 +29,8 @@ ENV/
 # Model artifacts
 *.pkl
 *.joblib
-models/
-artifacts/
+/models/
+/artifacts/
 
 # MLflow local runs
 mlruns/
@@ -47,3 +47,4 @@ Thumbs.db
 # IDE files
 .vscode/
 .idea/
+

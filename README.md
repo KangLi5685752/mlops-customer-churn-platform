@@ -18,6 +18,13 @@ The project will use the Telco Customer Churn dataset. The target variable is `C
 
 The dataset contains customer demographics, service subscription information, account information and billing-related features. The dataset file will not be included in this repository. Raw and processed data folders are included only as placeholders so the project structure is clear.
 
+## Data Setup
+
+1. Download the Telco Customer Churn CSV.
+2. Keep the filename as `WA_Fn-UseC_-Telco-Customer-Churn.csv`.
+3. Place it at `data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv`.
+4. The dataset is intentionally not committed to the repository.
+
 ## Prediction Task
 
 The prediction task is binary classification.
@@ -58,6 +65,13 @@ The baseline will not include:
 - prediction logging
 - drift monitoring
 
+
+## Baseline Experiment
+
+The Stage 2 baseline notebook is available at `notebooks/01_baseline_experiment.ipynb`. When run with the local Telco Customer Churn CSV, it trains a `DummyClassifier` sanity-check baseline and a simple `LogisticRegression` baseline using pandas and scikit-learn.
+
+The generated baseline summary is available at `reports/baseline_summary.md` after a successful local notebook run.
+
 ## Planned MLOps Components
 
 The planned MLOps components are:
@@ -86,7 +100,7 @@ Model performance will be evaluated on held-out test data using:
 - recall
 - confusion matrix
 
-No model metrics are included at this setup stage.
+Baseline model metrics are generated from a local notebook run and summarised in `reports/baseline_summary.md`.
 
 ### Engineering and MLOps Evaluation
 

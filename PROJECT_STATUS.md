@@ -1,23 +1,26 @@
-﻿# Project Status
+# Project Status
 
 ## Current Phase
 
-MVP scope and dataset definition.
+Stage 2 baseline notebook and initial evaluation completed locally.
 
 ## Completed in This Step
 
-- Created initial repository folder structure.
-- Added placeholders for raw data, processed data, notebooks, source modules, app, dashboard and tests.
-- Documented the project goal, business framing and dataset choice.
-- Defined the baseline scope and planned MLOps components.
-- Added a decision log.
-- Added model card and risk register templates.
-- Added minimal planned dependencies.
-- Added `.gitignore` rules for local artifacts, data files, model files, logs and development files.
+- Created `notebooks/01_baseline_experiment.ipynb` for the Telco churn baseline experiment.
+- Loaded the dataset from `data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv` using repository-relative paths.
+- Added basic EDA for shape, first rows, column types, target distribution, missing values, `TotalCharges` blanks and numeric summaries.
+- Dropped `customerID` as an identifier before modelling.
+- Converted `TotalCharges` to numeric and handled missing values through median imputation in the preprocessing pipeline.
+- Encoded `Churn` as the positive class where `Yes = 1` and `No = 0`.
+- Trained and evaluated `DummyClassifier` as a sanity-check baseline.
+- Trained and evaluated `LogisticRegression` as the first reasonable baseline model.
+- Generated `reports/baseline_metrics.json` and `reports/baseline_summary.md` from the real local dataset run.
+- Updated README data setup and baseline experiment notes.
+- Updated the decision log with baseline-stage modelling and data-cleaning decisions.
 
 ## Next Planned Task
 
-Create the baseline notebook or script for the Telco Customer Churn dataset, including data loading instructions, preprocessing, train/test split, model training and initial held-out evaluation metrics.
+Refactor baseline logic into reusable training and evaluation scripts under `src`.
 
 ## Known Risks
 
@@ -26,14 +29,16 @@ Create the baseline notebook or script for the Telco Customer Churn dataset, inc
 - Churn probability can be misused if treated as an automatic customer treatment decision.
 - Drift monitoring in this portfolio project will be simulated rather than based on live production data.
 - Scope could expand too quickly if cloud deployment, Kubernetes or streaming systems are added too early.
+- Baseline metrics may change if the dataset version or preprocessing assumptions change.
 
 ## Current Status Summary
 
-The project has been initialized as a portfolio-grade MLOps prototype for Telco customer churn prediction. The current repository state defines the MVP boundary, dataset decision, planned engineering components and responsible-use framing. No model, API, Docker, CI, MLflow or dashboard implementation has been added yet.
+The project now has an experimentation-stage Telco churn baseline. The notebook establishes a credible local workflow using pandas and scikit-learn, compares a dummy sanity-check model with logistic regression and saves real baseline metrics from the local dataset. No model artifact, API, Docker, CI, MLflow tracking, dashboard implementation or drift detection code has been added yet.
 
 ## Project Evidence and Validation Artifacts to Collect
 
-- Held-out model evaluation metrics.
+- Held-out model evaluation metrics from `reports/baseline_metrics.json`.
+- Baseline interpretation from `reports/baseline_summary.md`.
 - Before/after comparison between baseline notebook workflow and refactored MLOps workflow.
 - API request and response examples.
 - API average and p95 latency from local benchmarking.
@@ -48,3 +53,4 @@ The project has been initialized as a portfolio-grade MLOps prototype for Telco 
 ## Milestone Log
 
 - 2026-06-26: Initialized repository structure, documentation templates and MVP scope for the Telco churn MLOps project.
+- 2026-06-27: Added and executed the baseline Telco churn notebook, generating local baseline metrics and summary reports.
