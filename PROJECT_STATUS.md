@@ -2,9 +2,17 @@
 
 ## Current Phase
 
-Stage 2 baseline notebook and initial evaluation completed locally.
+Stage 3A reusable data and preprocessing modules completed locally.
 
 ## Completed in This Step
+
+- Added reusable path helpers in `src/utils/paths.py`.
+- Added reusable Telco churn data loading, cleaning and feature/target split helpers in `src/data/load_data.py`.
+- Added reusable preprocessing, dummy baseline pipeline and logistic regression pipeline builders in `src/features/preprocessing.py`.
+- Added package `__init__.py` files under `src`, `src/utils`, `src/data` and `src/features`.
+- Preserved Stage 2 notebook and metric reports without adding new training scripts or model artifacts.
+
+## Previous Stage 2 Completion
 
 - Created `notebooks/01_baseline_experiment.ipynb` for the Telco churn baseline experiment.
 - Loaded the dataset from `data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv` using repository-relative paths.
@@ -20,7 +28,7 @@ Stage 2 baseline notebook and initial evaluation completed locally.
 
 ## Next Planned Task
 
-Refactor baseline logic into reusable training and evaluation scripts under `src`.
+Create command-line training and evaluation scripts under `src/models` using the reusable Stage 3A modules.
 
 ## Known Risks
 
@@ -33,7 +41,7 @@ Refactor baseline logic into reusable training and evaluation scripts under `src
 
 ## Current Status Summary
 
-The project now has an experimentation-stage Telco churn baseline. The notebook establishes a credible local workflow using pandas and scikit-learn, compares a dummy sanity-check model with logistic regression and saves real baseline metrics from the local dataset. No model artifact, API, Docker, CI, MLflow tracking, dashboard implementation or drift detection code has been added yet.
+The project now has reusable Stage 3A modules for repository-relative paths, raw data loading, Telco-specific cleaning, feature/target splitting and baseline preprocessing pipeline construction. The Stage 2 notebook and reports remain in place. No training script, model artifact, API, Docker, CI, MLflow tracking, dashboard implementation or drift detection code has been added yet.
 
 ## Project Evidence and Validation Artifacts to Collect
 
@@ -54,3 +62,4 @@ The project now has an experimentation-stage Telco churn baseline. The notebook 
 
 - 2026-06-26: Initialized repository structure, documentation templates and MVP scope for the Telco churn MLOps project.
 - 2026-06-27: Added and executed the baseline Telco churn notebook, generating local baseline metrics and summary reports.
+- 2026-06-29: Added reusable path, data loading, cleaning and preprocessing modules for Stage 3A.
