@@ -2,9 +2,17 @@
 
 ## Current Phase
 
-Stage 3B command-line training and evaluation scripts completed locally.
+Stage 3C minimal pytest validation tests completed locally.
 
 ## Completed in This Step
+
+- Added pytest tests for Telco data cleaning.
+- Added pytest tests for preprocessing pipeline construction.
+- Added pytest tests for baseline model pipeline fit/predict behaviour.
+- Tests use synthetic data and do not require the raw dataset.
+- Preserved scope by not adding API, Docker, CI, MLflow, dashboard, prediction logging or drift detection yet.
+
+## Previous Stage 3B Completion
 
 - Added command-line training script `src/models/train.py`.
 - Added command-line evaluation script `src/models/evaluate.py`.
@@ -38,7 +46,7 @@ Stage 3B command-line training and evaluation scripts completed locally.
 
 ## Next Planned Task
 
-Stage 3C: add minimal pytest validation tests for data cleaning and model pipeline behaviour.
+Stage 4: add FastAPI `/health` and `/predict` endpoints for the saved model pipeline.
 
 ## Known Risks
 
@@ -51,7 +59,7 @@ Stage 3C: add minimal pytest validation tests for data cleaning and model pipeli
 
 ## Current Status Summary
 
-The project now has command-line training and evaluation scripts that reuse the Stage 3A modules. The training command generates a local full preprocessing and LogisticRegression pipeline artifact plus training metrics, and the evaluation command loads that artifact for held-out evaluation. No API, Docker, CI, MLflow tracking, dashboard implementation, prediction logging or drift detection code has been added yet.
+The project now has minimal pytest validation for Telco data cleaning, preprocessing construction and baseline pipeline fit/predict behaviour. The tests use synthetic data, so they can run without the raw dataset. No API, Docker, CI, MLflow tracking, dashboard implementation, prediction logging or drift detection code has been added yet.
 
 ## Project Evidence and Validation Artifacts to Collect
 
@@ -74,3 +82,4 @@ The project now has command-line training and evaluation scripts that reuse the 
 - 2026-06-27: Added and executed the baseline Telco churn notebook, generating local baseline metrics and summary reports.
 - 2026-06-29: Added reusable path, data loading, cleaning and preprocessing modules for Stage 3A.
 - 2026-06-29: Added command-line training and evaluation scripts for Stage 3B.
+- 2026-07-03: Added synthetic-data pytest coverage for Stage 3C.

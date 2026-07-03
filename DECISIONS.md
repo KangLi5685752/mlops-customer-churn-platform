@@ -95,3 +95,9 @@ Reason: Model artifacts are local generated outputs and can be recreated from th
 Decision: Make `src/models/evaluate.py` load `artifacts/model_pipeline.joblib` instead of silently retraining the main LogisticRegression model.
 
 Reason: Evaluation should validate the artifact that future serving code will use. If the artifact is missing, the user should explicitly run `python -m src.models.train`.
+
+## 2026-07-03: Keep early tests independent of the raw dataset
+
+Decision: Use small synthetic pandas DataFrames for early pytest validation instead of depending on the raw Telco CSV file.
+
+Reason: The raw dataset is intentionally excluded from Git. Synthetic-data tests can run in future CI without committing data while still validating cleaning, preprocessing and baseline pipeline behaviour.

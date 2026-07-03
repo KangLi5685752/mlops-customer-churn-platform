@@ -91,6 +91,16 @@ python -m src.models.evaluate
 
 The training script generates `artifacts/model_pipeline.joblib` locally. This artifact stores the full scikit-learn preprocessing and LogisticRegression pipeline and is intentionally excluded from Git. The evaluation script loads the saved pipeline and evaluates it on the same fixed held-out split used by the baseline workflow.
 
+## Tests
+
+From the project root, run:
+
+```bash
+python -m pytest
+```
+
+The tests use small synthetic data fixtures. They do not require the raw Telco CSV file.
+
 ## Planned MLOps Components
 
 The planned MLOps components are:
