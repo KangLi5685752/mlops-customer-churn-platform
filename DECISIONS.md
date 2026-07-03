@@ -77,3 +77,21 @@ Reason: Logistic regression is simple, transparent, appropriate for tabular bina
 Decision: Avoid complex model tuning, XGBoost, LightGBM and deep learning during Stage 2.
 
 Reason: The project scope is to establish a credible experimentation baseline before demonstrating refactoring, reproducibility, API serving, tests and monitoring.
+
+## 2026-06-29: Save the full model pipeline artifact
+
+Decision: Save the full scikit-learn preprocessing and LogisticRegression pipeline as `artifacts/model_pipeline.joblib`.
+
+Reason: The future API should load the same preprocessing and model steps used during training, rather than relying on a bare model with duplicated preprocessing logic.
+
+## 2026-06-29: Keep generated model artifacts out of Git
+
+Decision: Keep generated model artifacts such as `artifacts/model_pipeline.joblib` out of Git.
+
+Reason: Model artifacts are local generated outputs and can be recreated from the training command. Keeping them out of Git avoids repository bloat and stale binary files.
+
+## 2026-06-29: Require evaluate.py to load the saved artifact
+
+Decision: Make `src/models/evaluate.py` load `artifacts/model_pipeline.joblib` instead of silently retraining the main LogisticRegression model.
+
+Reason: Evaluation should validate the artifact that future serving code will use. If the artifact is missing, the user should explicitly run `python -m src.models.train`.

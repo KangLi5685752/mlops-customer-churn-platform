@@ -72,6 +72,25 @@ The Stage 2 baseline notebook is available at `notebooks/01_baseline_experiment.
 
 The generated baseline summary is available at `reports/baseline_summary.md` after a successful local notebook run.
 
+
+## Reproducible Training and Evaluation
+
+The exploratory baseline remains in `notebooks/01_baseline_experiment.ipynb`. Reusable workflow code lives under `src/` and can be run from the command line after the dataset is placed at `data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv`.
+
+Train the baseline pipeline:
+
+```bash
+python -m src.models.train
+```
+
+Evaluate the saved pipeline:
+
+```bash
+python -m src.models.evaluate
+```
+
+The training script generates `artifacts/model_pipeline.joblib` locally. This artifact stores the full scikit-learn preprocessing and LogisticRegression pipeline and is intentionally excluded from Git. The evaluation script loads the saved pipeline and evaluates it on the same fixed held-out split used by the baseline workflow.
+
 ## Planned MLOps Components
 
 The planned MLOps components are:

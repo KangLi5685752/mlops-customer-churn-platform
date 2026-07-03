@@ -35,4 +35,4 @@ PROJECT_ROOT = _resolve_project_root()
 RAW_DATA_PATH = PROJECT_ROOT / "data" / "raw" / DATASET_FILENAME
 REPORTS_DIR = PROJECT_ROOT / "reports"
 ARTIFACTS_DIR = PROJECT_ROOT / "artifacts"
-MODEL_ARTIFACT_PATH = ARTIFACTS_DIR / "telco_churn_model.joblib"
+MODEL_ARTIFACT_PATH = ARTIFACTS_DIR / "model_pipeline.joblib"

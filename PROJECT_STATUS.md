@@ -2,9 +2,19 @@
 
 ## Current Phase
 
-Stage 3A reusable data and preprocessing modules completed locally.
+Stage 3B command-line training and evaluation scripts completed locally.
 
 ## Completed in This Step
+
+- Added command-line training script `src/models/train.py`.
+- Added command-line evaluation script `src/models/evaluate.py`.
+- Updated the local model artifact path to `artifacts/model_pipeline.joblib`.
+- Generated local model pipeline artifact.
+- Generated `reports/training_metrics.json` with real local metrics.
+- Generated `reports/evaluation_summary.md` with real local metrics.
+- Preserved scope by not adding API, Docker, CI, MLflow, dashboard, prediction logging or drift detection yet.
+
+## Previous Stage 3A Completion
 
 - Added reusable path helpers in `src/utils/paths.py`.
 - Added reusable Telco churn data loading, cleaning and feature/target split helpers in `src/data/load_data.py`.
@@ -28,7 +38,7 @@ Stage 3A reusable data and preprocessing modules completed locally.
 
 ## Next Planned Task
 
-Create command-line training and evaluation scripts under `src/models` using the reusable Stage 3A modules.
+Stage 3C: add minimal pytest validation tests for data cleaning and model pipeline behaviour.
 
 ## Known Risks
 
@@ -41,7 +51,7 @@ Create command-line training and evaluation scripts under `src/models` using the
 
 ## Current Status Summary
 
-The project now has reusable Stage 3A modules for repository-relative paths, raw data loading, Telco-specific cleaning, feature/target splitting and baseline preprocessing pipeline construction. The Stage 2 notebook and reports remain in place. No training script, model artifact, API, Docker, CI, MLflow tracking, dashboard implementation or drift detection code has been added yet.
+The project now has command-line training and evaluation scripts that reuse the Stage 3A modules. The training command generates a local full preprocessing and LogisticRegression pipeline artifact plus training metrics, and the evaluation command loads that artifact for held-out evaluation. No API, Docker, CI, MLflow tracking, dashboard implementation, prediction logging or drift detection code has been added yet.
 
 ## Project Evidence and Validation Artifacts to Collect
 
@@ -63,3 +73,4 @@ The project now has reusable Stage 3A modules for repository-relative paths, raw
 - 2026-06-26: Initialized repository structure, documentation templates and MVP scope for the Telco churn MLOps project.
 - 2026-06-27: Added and executed the baseline Telco churn notebook, generating local baseline metrics and summary reports.
 - 2026-06-29: Added reusable path, data loading, cleaning and preprocessing modules for Stage 3A.
+- 2026-06-29: Added command-line training and evaluation scripts for Stage 3B.
