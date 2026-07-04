@@ -6,6 +6,7 @@ fastapi
 uvicorn
 pydantic
 pytest
+httpx
 mlflow
 streamlit
 matplotlib

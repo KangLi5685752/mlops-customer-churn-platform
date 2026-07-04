@@ -113,3 +113,9 @@ Reason: Serving should use the same saved preprocessing and model pipeline gener
 Decision: Map churn probability to local prototype risk labels using `high` for probability >= 0.65, `medium` for probability >= 0.35 and `low` otherwise.
 
 Reason: A simple threshold rule is readable for the MVP API. It is a local demonstration rule, not a validated business policy.
+
+## 2026-07-04: Mock model loading in API endpoint tests
+
+Decision: API endpoint tests mock `load_model_pipeline` instead of loading `artifacts/model_pipeline.joblib`.
+
+Reason: The model artifact is intentionally excluded from Git. Mocking model loading keeps endpoint tests suitable for future CI without committing generated artifacts or raw data.

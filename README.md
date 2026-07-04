@@ -99,7 +99,7 @@ From the project root, run:
 python -m pytest
 ```
 
-The tests use small synthetic data fixtures. They do not require the raw Telco CSV file.
+The tests include data cleaning, preprocessing, model-pipeline and FastAPI endpoint checks. They use small synthetic inputs and mocked model loading where appropriate, so they do not require the raw Telco CSV file or a committed model artifact.
 
 ## Run the FastAPI App
 

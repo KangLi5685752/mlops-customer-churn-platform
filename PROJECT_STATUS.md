@@ -2,9 +2,18 @@
 
 ## Current Phase
 
-Stage 4A FastAPI health and prediction endpoints completed locally.
+Stage 4B FastAPI endpoint tests completed locally.
 
 ## Completed in This Step
+
+- Added pytest tests for GET `/health`.
+- Added pytest tests for successful POST `/predict` using mocked model pipeline.
+- Added pytest tests for missing model artifact behaviour.
+- Added pytest tests for invalid prediction payload validation.
+- Tests do not require raw dataset or real model artifact.
+- Preserved scope by not adding Docker, CI, MLflow, dashboard, prediction logging or drift detection yet.
+
+## Previous Stage 4A Completion
 
 - Added FastAPI app.
 - Added `/health` endpoint.
@@ -55,7 +64,7 @@ Stage 4A FastAPI health and prediction endpoints completed locally.
 
 ## Next Planned Task
 
-Stage 4B: add API tests for `/health` and `/predict`.
+Stage 5A: add Dockerfile for local API containerisation.
 
 ## Known Risks
 
@@ -68,7 +77,7 @@ Stage 4B: add API tests for `/health` and `/predict`.
 
 ## Current Status Summary
 
-The project now has a minimal FastAPI app with `/health` and `/predict` endpoints. The API loads the saved local preprocessing and LogisticRegression pipeline artifact from `artifacts/model_pipeline.joblib` and does not retrain the model. No Docker, CI, MLflow tracking, dashboard implementation, prediction logging or drift detection code has been added yet.
+The project now has FastAPI endpoint tests for `/health` and `/predict`. The prediction tests mock model loading, so they can run without the raw dataset or local model artifact. No Docker, CI, MLflow tracking, dashboard implementation, prediction logging or drift detection code has been added yet.
 
 ## Project Evidence and Validation Artifacts to Collect
 
@@ -93,3 +102,4 @@ The project now has a minimal FastAPI app with `/health` and `/predict` endpoint
 - 2026-06-29: Added command-line training and evaluation scripts for Stage 3B.
 - 2026-07-03: Added synthetic-data pytest coverage for Stage 3C.
 - 2026-07-04: Added FastAPI health and prediction endpoints for Stage 4A.
+- 2026-07-04: Added FastAPI endpoint tests for Stage 4B.
