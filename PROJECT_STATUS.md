@@ -2,9 +2,18 @@
 
 ## Current Phase
 
-Stage 3C minimal pytest validation tests completed locally.
+Stage 4A FastAPI health and prediction endpoints completed locally.
 
 ## Completed in This Step
+
+- Added FastAPI app.
+- Added `/health` endpoint.
+- Added `/predict` endpoint.
+- Added Pydantic request and response schemas.
+- API loads the saved local model pipeline artifact.
+- API does not retrain the model.
+
+## Previous Stage 3C Completion
 
 - Added pytest tests for Telco data cleaning.
 - Added pytest tests for preprocessing pipeline construction.
@@ -46,7 +55,7 @@ Stage 3C minimal pytest validation tests completed locally.
 
 ## Next Planned Task
 
-Stage 4: add FastAPI `/health` and `/predict` endpoints for the saved model pipeline.
+Stage 4B: add API tests for `/health` and `/predict`.
 
 ## Known Risks
 
@@ -59,7 +68,7 @@ Stage 4: add FastAPI `/health` and `/predict` endpoints for the saved model pipe
 
 ## Current Status Summary
 
-The project now has minimal pytest validation for Telco data cleaning, preprocessing construction and baseline pipeline fit/predict behaviour. The tests use synthetic data, so they can run without the raw dataset. No API, Docker, CI, MLflow tracking, dashboard implementation, prediction logging or drift detection code has been added yet.
+The project now has a minimal FastAPI app with `/health` and `/predict` endpoints. The API loads the saved local preprocessing and LogisticRegression pipeline artifact from `artifacts/model_pipeline.joblib` and does not retrain the model. No Docker, CI, MLflow tracking, dashboard implementation, prediction logging or drift detection code has been added yet.
 
 ## Project Evidence and Validation Artifacts to Collect
 
@@ -83,3 +92,4 @@ The project now has minimal pytest validation for Telco data cleaning, preproces
 - 2026-06-29: Added reusable path, data loading, cleaning and preprocessing modules for Stage 3A.
 - 2026-06-29: Added command-line training and evaluation scripts for Stage 3B.
 - 2026-07-03: Added synthetic-data pytest coverage for Stage 3C.
+- 2026-07-04: Added FastAPI health and prediction endpoints for Stage 4A.

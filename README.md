@@ -101,6 +101,52 @@ python -m pytest
 
 The tests use small synthetic data fixtures. They do not require the raw Telco CSV file.
 
+## Run the FastAPI App
+
+From the project root, first generate the local model artifact:
+
+```bash
+python -m src.models.train
+```
+
+Then start the API:
+
+```bash
+python -m uvicorn app.main:app --reload
+```
+
+The API loads `artifacts/model_pipeline.joblib`. The artifact is generated locally and excluded from Git. OpenAPI docs are available at:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+Use `POST /predict` with a Telco customer JSON payload:
+
+```json
+{
+  "gender": "Female",
+  "SeniorCitizen": 0,
+  "Partner": "Yes",
+  "Dependents": "No",
+  "tenure": 12,
+  "PhoneService": "Yes",
+  "MultipleLines": "No",
+  "InternetService": "DSL",
+  "OnlineSecurity": "Yes",
+  "OnlineBackup": "No",
+  "DeviceProtection": "No",
+  "TechSupport": "No",
+  "StreamingTV": "No",
+  "StreamingMovies": "No",
+  "Contract": "Month-to-month",
+  "PaperlessBilling": "Yes",
+  "PaymentMethod": "Electronic check",
+  "MonthlyCharges": 59.9,
+  "TotalCharges": 718.8
+}
+```
+
 ## Planned MLOps Components
 
 The planned MLOps components are:
