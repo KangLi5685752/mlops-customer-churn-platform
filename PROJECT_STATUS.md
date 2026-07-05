@@ -2,9 +2,18 @@
 
 ## Current Phase
 
-Stage 4B FastAPI endpoint tests completed locally.
+Stage 5A Dockerfile for local API containerisation completed locally.
 
 ## Completed in This Step
+
+- Added Dockerfile for the FastAPI API.
+- Added `.dockerignore`.
+- Docker image runs the FastAPI app on port 8000.
+- Docker image loads the local model pipeline artifact.
+- Raw dataset is excluded from the Docker build context.
+- No Docker Compose, CI, MLflow, dashboard, prediction logging or drift detection added yet.
+
+## Previous Stage 4B Completion
 
 - Added pytest tests for GET `/health`.
 - Added pytest tests for successful POST `/predict` using mocked model pipeline.
@@ -64,7 +73,7 @@ Stage 4B FastAPI endpoint tests completed locally.
 
 ## Next Planned Task
 
-Stage 5A: add Dockerfile for local API containerisation.
+Stage 5B: add Docker-related documentation checks or prepare GitHub Actions CI.
 
 ## Known Risks
 
@@ -77,7 +86,7 @@ Stage 5A: add Dockerfile for local API containerisation.
 
 ## Current Status Summary
 
-The project now has FastAPI endpoint tests for `/health` and `/predict`. The prediction tests mock model loading, so they can run without the raw dataset or local model artifact. No Docker, CI, MLflow tracking, dashboard implementation, prediction logging or drift detection code has been added yet.
+The project now has Docker support for local FastAPI API containerisation. The Dockerfile serves the existing API, copies the locally generated `artifacts/model_pipeline.joblib` into the image and does not train the model. No Docker Compose, CI, MLflow tracking, dashboard implementation, prediction logging or drift detection code has been added yet.
 
 ## Project Evidence and Validation Artifacts to Collect
 
@@ -103,3 +112,4 @@ The project now has FastAPI endpoint tests for `/health` and `/predict`. The pre
 - 2026-07-03: Added synthetic-data pytest coverage for Stage 3C.
 - 2026-07-04: Added FastAPI health and prediction endpoints for Stage 4A.
 - 2026-07-04: Added FastAPI endpoint tests for Stage 4B.
+- 2026-07-04: Added Dockerfile and `.dockerignore` for Stage 5A local API containerisation.

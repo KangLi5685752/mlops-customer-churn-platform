@@ -147,6 +147,35 @@ Use `POST /predict` with a Telco customer JSON payload:
 }
 ```
 
+## Run with Docker
+
+From the project root, generate the local model artifact:
+
+```bash
+python -m src.models.train
+```
+
+Build the Docker image:
+
+```bash
+docker build -t mlops-customer-churn-api .
+```
+
+Run the container:
+
+```bash
+docker run --rm -p 8000:8000 mlops-customer-churn-api
+```
+
+Open:
+
+```text
+http://127.0.0.1:8000/health
+http://127.0.0.1:8000/docs
+```
+
+The Docker image uses the locally generated `artifacts/model_pipeline.joblib`. The raw dataset is not copied into the image. The Dockerfile does not train the model. This is a local containerised API prototype, not a cloud deployment.
+
 ## Planned MLOps Components
 
 The planned MLOps components are:

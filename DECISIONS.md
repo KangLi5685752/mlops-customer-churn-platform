@@ -119,3 +119,15 @@ Reason: A simple threshold rule is readable for the MVP API. It is a local demon
 Decision: API endpoint tests mock `load_model_pipeline` instead of loading `artifacts/model_pipeline.joblib`.
 
 Reason: The model artifact is intentionally excluded from Git. Mocking model loading keeps endpoint tests suitable for future CI without committing generated artifacts or raw data.
+
+## 2026-07-04: Copy local model artifact into the Docker image
+
+Decision: For the local Docker MVP, copy the locally generated `artifacts/model_pipeline.joblib` into the image after running the training script, while keeping the artifact out of Git.
+
+Reason: The API container needs the saved preprocessing and model pipeline at runtime, but generated binary artifacts should remain reproducible local outputs rather than committed source files.
+
+## 2026-07-04: Keep model training separate from Docker build
+
+Decision: The Dockerfile does not train the model. Users must run `python -m src.models.train` before building the image.
+
+Reason: Keeping training outside the image build makes the container serve an explicit saved artifact and avoids hidden training side effects during packaging.
