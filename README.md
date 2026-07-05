@@ -101,6 +101,12 @@ python -m pytest
 
 The tests include data cleaning, preprocessing, model-pipeline and FastAPI endpoint checks. They use small synthetic inputs and mocked model loading where appropriate, so they do not require the raw Telco CSV file or a committed model artifact.
 
+## Continuous Integration
+
+GitHub Actions runs the pytest suite on every push and pull request using Python 3.10.
+
+The CI workflow installs dependencies from `requirements.txt` and runs `python -m pytest`. These tests use synthetic data and mocked API model loading where appropriate, so CI does not require the raw Telco CSV file or a committed `artifacts/model_pipeline.joblib` file.
+
 ## Run the FastAPI App
 
 From the project root, first generate the local model artifact:

@@ -2,15 +2,24 @@
 
 ## Current Phase
 
-Stage 5A Dockerfile for local API containerisation completed locally.
+Stage 5B GitHub Actions CI for pytest completed locally.
 
 ## Completed in This Step
+
+- Added GitHub Actions CI workflow.
+- CI installs Python dependencies from `requirements.txt`.
+- CI runs `python -m pytest` on push and pull request.
+- CI does not require the raw dataset or model artifact.
+- No Docker build, MLflow, dashboard, prediction logging or drift detection added yet.
+
+## Previous Stage 5A Completion
 
 - Added Dockerfile for the FastAPI API.
 - Added `.dockerignore`.
 - Docker image runs the FastAPI app on port 8000.
 - Docker image loads the local model pipeline artifact.
 - Raw dataset is excluded from the Docker build context.
+- Docker image includes project-root markers needed by the path helper without copying the raw dataset.
 - No Docker Compose, CI, MLflow, dashboard, prediction logging or drift detection added yet.
 
 ## Previous Stage 4B Completion
@@ -73,7 +82,7 @@ Stage 5A Dockerfile for local API containerisation completed locally.
 
 ## Next Planned Task
 
-Stage 5B: add Docker-related documentation checks or prepare GitHub Actions CI.
+Stage 5C: add optional Docker build check in CI or proceed to MLflow tracking, depending on scope.
 
 ## Known Risks
 
@@ -86,7 +95,7 @@ Stage 5B: add Docker-related documentation checks or prepare GitHub Actions CI.
 
 ## Current Status Summary
 
-The project now has Docker support for local FastAPI API containerisation. The Dockerfile serves the existing API, copies the locally generated `artifacts/model_pipeline.joblib` into the image and does not train the model. No Docker Compose, CI, MLflow tracking, dashboard implementation, prediction logging or drift detection code has been added yet.
+The project now has a simple GitHub Actions CI workflow for automated pytest execution on push and pull request. The workflow installs Python dependencies and runs `python -m pytest` without requiring the raw dataset, committed model artifact, Docker build, MLflow tracking, dashboard implementation, prediction logging or drift detection code.
 
 ## Project Evidence and Validation Artifacts to Collect
 
@@ -113,3 +122,4 @@ The project now has Docker support for local FastAPI API containerisation. The D
 - 2026-07-04: Added FastAPI health and prediction endpoints for Stage 4A.
 - 2026-07-04: Added FastAPI endpoint tests for Stage 4B.
 - 2026-07-04: Added Dockerfile and `.dockerignore` for Stage 5A local API containerisation.
+- 2026-07-05: Added GitHub Actions pytest workflow for Stage 5B.

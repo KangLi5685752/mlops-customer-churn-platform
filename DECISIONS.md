@@ -131,3 +131,9 @@ Reason: The API container needs the saved preprocessing and model pipeline at ru
 Decision: The Dockerfile does not train the model. Users must run `python -m src.models.train` before building the image.
 
 Reason: Keeping training outside the image build makes the container serve an explicit saved artifact and avoids hidden training side effects during packaging.
+
+## 2026-07-05: Keep the first CI workflow focused on pytest
+
+Decision: The first GitHub Actions workflow runs dependency installation and `python -m pytest`, without running training or Docker build validation.
+
+Reason: The test suite is intentionally independent of the raw Telco CSV and generated model artifacts. Docker build validation remains a separate concern from the initial CI check.
