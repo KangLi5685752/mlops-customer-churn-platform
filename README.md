@@ -193,6 +193,30 @@ Prediction log events include a UTC timestamp, request ID, model artifact path, 
 
 `logs/predictions.jsonl` is excluded from Git. These local logs are intended for later simulated drift detection and dashboarding. This is local prototype logging, not production observability.
 
+## Generate Sample Prediction Traffic
+
+From the project root, train the model first:
+
+```bash
+python -m src.models.train
+```
+
+Start the FastAPI app:
+
+```bash
+python -m uvicorn app.main:app --reload
+```
+
+In a second terminal, generate synthetic local sample traffic:
+
+```bash
+python -m scripts.generate_sample_prediction_traffic --n 30
+```
+
+Prediction events are appended to `logs/predictions.jsonl`, and a summary is written to `reports/sample_prediction_traffic_summary.md`.
+
+`logs/predictions.jsonl` is excluded from Git. The generated traffic is synthetic local sample traffic intended to support later simulated drift detection and dashboarding. It is not real production traffic.
+
 ## Run with Docker
 
 From the project root, generate the local model artifact:

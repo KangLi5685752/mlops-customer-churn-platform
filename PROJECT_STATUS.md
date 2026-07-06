@@ -2,9 +2,17 @@
 
 ## Current Phase
 
-Stage 7A local prediction logging added to the FastAPI inference workflow.
+Stage 7B sample prediction traffic generation added.
 
 ## Completed in This Step
+
+- Added script to send synthetic Telco payloads to the local `/predict` endpoint.
+- Generated sample prediction events through the API logging workflow.
+- Added summary report for sample prediction traffic.
+- Kept generated prediction logs excluded from Git.
+- No drift detection, dashboard, database, cloud deployment or production monitoring added yet.
+
+## Previous Stage 7A Completion
 
 - Added local JSONL prediction logging for successful `/predict` calls.
 - Logged prediction timestamp, request ID, churn probability, predicted class, risk label and selected monitoring features.
@@ -100,7 +108,7 @@ Stage 7A local prediction logging added to the FastAPI inference workflow.
 
 ## Next Planned Task
 
-Stage 7B: generate sample prediction traffic and prepare logs for simulated drift detection.
+Stage 8A: add simulated drift detection using generated prediction logs.
 
 ## Known Risks
 
@@ -113,7 +121,7 @@ Stage 7B: generate sample prediction traffic and prepare logs for simulated drif
 
 ## Current Status Summary
 
-The project now has local JSONL prediction logging in the FastAPI inference workflow. Successful `/predict` calls append structured events to `logs/predictions.jsonl`, capturing prediction outputs and selected monitoring features for later simulated drift detection and dashboarding. No drift detection, dashboard, database, cloud deployment or production monitoring code has been added yet.
+The project now has a local sample traffic generator that sends synthetic Telco payloads through the FastAPI `/predict` endpoint. This populates `logs/predictions.jsonl` through the same API logging workflow used during inference and writes a summary to `reports/sample_prediction_traffic_summary.md`. No drift detection, dashboard, database, cloud deployment or production monitoring code has been added yet.
 
 ## Project Evidence and Validation Artifacts to Collect
 
@@ -143,3 +151,4 @@ The project now has local JSONL prediction logging in the FastAPI inference work
 - 2026-07-05: Added GitHub Actions pytest workflow for Stage 5B.
 - 2026-07-06: Added local MLflow experiment tracking to the training workflow for Stage 6A.
 - 2026-07-07: Added local JSONL prediction logging for Stage 7A.
+- 2026-07-07: Added synthetic local prediction traffic generation for Stage 7B.

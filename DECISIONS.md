@@ -149,3 +149,9 @@ Reason: Local MLflow tracking gives useful experiment evidence without adding a 
 Decision: Append successful API prediction events to `logs/predictions.jsonl` using one JSON object per line, while logging only selected monitoring features rather than the full raw request payload.
 
 Reason: JSONL is simple, append-friendly and easy to inspect locally. Logging a focused feature subset keeps the MVP more privacy-conscious while still creating useful input for later simulated drift detection. Prediction logs are generated runtime outputs and should remain out of Git.
+
+## 2026-07-07: Generate sample traffic through the API
+
+Decision: Generate synthetic local sample prediction traffic by sending valid Telco payloads to the running FastAPI `/predict` endpoint instead of writing prediction logs directly.
+
+Reason: Sending traffic through the API ensures sample prediction logs are produced by the same path used during inference. The generated traffic is synthetic local traffic for monitoring demonstrations, not production traffic.
