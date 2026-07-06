@@ -2,9 +2,19 @@
 
 ## Current Phase
 
-Stage 5B GitHub Actions CI for pytest completed locally.
+Stage 6A MLflow experiment tracking added to training workflow.
 
 ## Completed in This Step
+
+- Added local MLflow tracking to the training script.
+- Logged training parameters.
+- Logged LogisticRegression metrics.
+- Logged DummyClassifier baseline metrics.
+- Logged model artifact and training metrics report as MLflow artifacts.
+- Kept `mlruns/` excluded from Git.
+- No MLflow server, model registry, prediction logging, drift detection or dashboard added yet.
+
+## Previous Stage 5B Completion
 
 - Added GitHub Actions CI workflow.
 - CI installs Python dependencies from `requirements.txt`.
@@ -82,7 +92,7 @@ Stage 5B GitHub Actions CI for pytest completed locally.
 
 ## Next Planned Task
 
-Stage 5C: add optional Docker build check in CI or proceed to MLflow tracking, depending on scope.
+Stage 6B: review MLflow outputs and decide whether to add lightweight experiment comparison documentation, or proceed to prediction logging.
 
 ## Known Risks
 
@@ -95,7 +105,7 @@ Stage 5C: add optional Docker build check in CI or proceed to MLflow tracking, d
 
 ## Current Status Summary
 
-The project now has a simple GitHub Actions CI workflow for automated pytest execution on push and pull request. The workflow installs Python dependencies and runs `python -m pytest` without requiring the raw dataset, committed model artifact, Docker build, MLflow tracking, dashboard implementation, prediction logging or drift detection code.
+The project now has local MLflow experiment tracking in the command-line training workflow. Training logs parameters, LogisticRegression metrics, DummyClassifier baseline metrics and generated local artifacts to file-based MLflow runs under `mlruns/`. No MLflow server, model registry, prediction logging, drift detection or dashboard code has been added yet.
 
 ## Project Evidence and Validation Artifacts to Collect
 
@@ -123,3 +133,4 @@ The project now has a simple GitHub Actions CI workflow for automated pytest exe
 - 2026-07-04: Added FastAPI endpoint tests for Stage 4B.
 - 2026-07-04: Added Dockerfile and `.dockerignore` for Stage 5A local API containerisation.
 - 2026-07-05: Added GitHub Actions pytest workflow for Stage 5B.
+- 2026-07-06: Added local MLflow experiment tracking to the training workflow for Stage 6A.

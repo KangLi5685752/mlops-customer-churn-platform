@@ -91,6 +91,38 @@ python -m src.models.evaluate
 
 The training script generates `artifacts/model_pipeline.joblib` locally. This artifact stores the full scikit-learn preprocessing and LogisticRegression pipeline and is intentionally excluded from Git. The evaluation script loads the saved pipeline and evaluates it on the same fixed held-out split used by the baseline workflow.
 
+## MLflow Experiment Tracking
+
+Training runs log parameters, metrics and local artifacts to MLflow.
+
+Run training from the project root:
+
+```bash
+python -m src.models.train
+```
+
+This project uses local file-based MLflow tracking under `mlruns/`. Start the local MLflow UI from the project root with the command for your shell.
+
+Windows CMD:
+
+```cmd
+set "MLFLOW_ALLOW_FILE_STORE=true" && python -m mlflow ui --backend-store-uri ./mlruns
+```
+
+macOS/Linux:
+
+```bash
+MLFLOW_ALLOW_FILE_STORE=true python -m mlflow ui --backend-store-uri ./mlruns
+```
+
+Open:
+
+```text
+http://127.0.0.1:5000
+```
+
+`mlruns/` is excluded from Git. This remains local experiment tracking, not a remote tracking server or model registry.
+
 ## Tests
 
 From the project root, run:

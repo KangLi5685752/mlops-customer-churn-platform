@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import json
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 import joblib
+import mlflow
 import pandas as pd
 from sklearn.metrics import (
     accuracy_score,
@@ -30,6 +32,9 @@ from src.utils.paths import MODEL_ARTIFACT_PATH, PROJECT_ROOT, RAW_DATA_PATH, RE
 RANDOM_STATE = 42
 TEST_SIZE = 0.2
 TRAINING_METRICS_PATH = REPORTS_DIR / "training_metrics.json"
+MLFLOW_RUN_SUMMARY_PATH = REPORTS_DIR / "mlflow_run_summary.md"
+MLFLOW_EXPERIMENT_NAME = "telco-churn-baseline"
+MLFLOW_TRACKING_URI = (PROJECT_ROOT / "mlruns").as_uri()
 REPORT_DATASET_PATH = RAW_DATA_PATH.relative_to(PROJECT_ROOT).as_posix()
 REPORT_MODEL_ARTIFACT_PATH = MODEL_ARTIFACT_PATH.relative_to(PROJECT_ROOT).as_posix()
 
@@ -93,6 +98,80 @@ def build_training_payload(
     }
 
 
+def log_mlflow_metrics(metrics: dict[str, dict[str, Any]]) -> None:
+    """Log scalar model metrics to the active MLflow run."""
+    for metric_name, metric_value in metrics["LogisticRegression"].items():
+        if metric_name != "confusion_matrix" and metric_value is not None:
+            mlflow.log_metric(metric_name, float(metric_value))
+
+    for metric_name, metric_value in metrics["DummyClassifier"].items():
+        if metric_name != "confusion_matrix" and metric_value is not None:
+            mlflow.log_metric(f"dummy_{metric_name}", float(metric_value))
+
+
+def build_mlflow_run_summary(run_id: str, metrics: dict[str, dict[str, Any]]) -> str:
+    """Build a concise local MLflow run summary for the reports directory."""
+    logistic_metrics = metrics["LogisticRegression"]
+    dummy_metrics = metrics["DummyClassifier"]
+
+    return "\n".join(
+        [
+            "# MLflow Run Summary",
+            "",
+            f"- Experiment name: `{MLFLOW_EXPERIMENT_NAME}`",
+            f"- Run ID: `{run_id}`",
+            "- Logged model type: `LogisticRegression`",
+            "- Baseline model: `DummyClassifier`",
+            f"- Model artifact path: `{REPORT_MODEL_ARTIFACT_PATH}`",
+            f"- Training metrics report: `{TRAINING_METRICS_PATH.relative_to(PROJECT_ROOT).as_posix()}`",
+            "",
+            "## LogisticRegression Metrics",
+            "",
+            f"- ROC-AUC: {logistic_metrics['roc_auc']}",
+            f"- Accuracy: {logistic_metrics['accuracy']}",
+            f"- Precision: {logistic_metrics['precision']}",
+            f"- Recall: {logistic_metrics['recall']}",
+            f"- F1: {logistic_metrics['f1']}",
+            "",
+            "## DummyClassifier Metrics",
+            "",
+            f"- ROC-AUC: {dummy_metrics['roc_auc']}",
+            f"- Accuracy: {dummy_metrics['accuracy']}",
+            f"- Precision: {dummy_metrics['precision']}",
+            f"- Recall: {dummy_metrics['recall']}",
+            f"- F1: {dummy_metrics['f1']}",
+            "",
+            "## Local MLflow UI",
+            "",
+            "Start the local UI from the project root:",
+            "",
+            "```bash",
+            "mlflow ui",
+            "```",
+            "",
+            "Open:",
+            "",
+            "```text",
+            "http://127.0.0.1:5000",
+            "```",
+            "",
+        ]
+    )
+
+
+def write_mlflow_run_summary(run_id: str, metrics: dict[str, dict[str, Any]]) -> bool:
+    """Write the local MLflow run summary without masking training success."""
+    try:
+        MLFLOW_RUN_SUMMARY_PATH.write_text(
+            build_mlflow_run_summary(run_id, metrics),
+            encoding="utf-8",
+        )
+    except OSError as exc:
+        print(f"Warning: could not write MLflow run summary: {exc}")
+        return False
+    return True
+
+
 def main() -> None:
     """Train baseline models and save the LogisticRegression pipeline artifact."""
     raw_df = load_raw_data()
@@ -110,20 +189,45 @@ def main() -> None:
     dummy_pipeline = build_dummy_pipeline(X_train)
     logistic_pipeline = build_logistic_regression_pipeline(X_train)
 
-    dummy_pipeline.fit(X_train, y_train)
-    logistic_pipeline.fit(X_train, y_train)
+    os.environ.setdefault("MLFLOW_ALLOW_FILE_STORE", "true")
+    mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
+    mlflow.set_experiment(MLFLOW_EXPERIMENT_NAME)
 
-    metrics = {
-        "DummyClassifier": evaluate_classifier(dummy_pipeline, X_test, y_test),
-        "LogisticRegression": evaluate_classifier(logistic_pipeline, X_test, y_test),
-    }
+    with mlflow.start_run() as run:
+        mlflow.log_params(
+            {
+                "model_type": "LogisticRegression",
+                "baseline_model": "DummyClassifier",
+                "test_size": TEST_SIZE,
+                "random_state": RANDOM_STATE,
+                "target": "Churn",
+                "artifact_path": REPORT_MODEL_ARTIFACT_PATH,
+            }
+        )
 
-    MODEL_ARTIFACT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    joblib.dump(logistic_pipeline, MODEL_ARTIFACT_PATH)
+        dummy_pipeline.fit(X_train, y_train)
+        logistic_pipeline.fit(X_train, y_train)
 
-    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-    payload = build_training_payload(raw_df, X, y_train, y_test, metrics)
-    TRAINING_METRICS_PATH.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+        metrics = {
+            "DummyClassifier": evaluate_classifier(dummy_pipeline, X_test, y_test),
+            "LogisticRegression": evaluate_classifier(logistic_pipeline, X_test, y_test),
+        }
+
+        MODEL_ARTIFACT_PATH.parent.mkdir(parents=True, exist_ok=True)
+        joblib.dump(logistic_pipeline, MODEL_ARTIFACT_PATH)
+
+        REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+        payload = build_training_payload(raw_df, X, y_train, y_test, metrics)
+        TRAINING_METRICS_PATH.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+        log_mlflow_metrics(metrics)
+        mlflow.log_artifact(str(TRAINING_METRICS_PATH), artifact_path="reports")
+        mlflow.log_artifact(str(MODEL_ARTIFACT_PATH), artifact_path="artifacts")
+
+        run_id = run.info.run_id
+        summary_written = write_mlflow_run_summary(run_id, metrics)
+        if summary_written:
+            mlflow.log_artifact(str(MLFLOW_RUN_SUMMARY_PATH), artifact_path="reports")
 
     print("Training completed")
     print(f"Dataset: {RAW_DATA_PATH}")
@@ -133,6 +237,11 @@ def main() -> None:
         print(format_metrics_line(model_name, model_metrics))
     print(f"Saved model pipeline artifact to {MODEL_ARTIFACT_PATH}")
     print(f"Saved training metrics to {TRAINING_METRICS_PATH}")
+    if summary_written:
+        print(f"Saved MLflow run summary to {MLFLOW_RUN_SUMMARY_PATH}")
+    print(f"MLflow experiment: {MLFLOW_EXPERIMENT_NAME}")
+    print(f"MLflow run ID: {run_id}")
+    print(f"MLflow tracking URI: {MLFLOW_TRACKING_URI}")
 
 
 if __name__ == "__main__":

@@ -137,3 +137,9 @@ Reason: Keeping training outside the image build makes the container serve an ex
 Decision: The first GitHub Actions workflow runs dependency installation and `python -m pytest`, without running training or Docker build validation.
 
 Reason: The test suite is intentionally independent of the raw Telco CSV and generated model artifacts. Docker build validation remains a separate concern from the initial CI check.
+
+## 2026-07-06: Use local file-based MLflow tracking for the MVP
+
+Decision: Log training parameters, metrics and generated artifacts to local file-based MLflow runs under `mlruns/`, while keeping `mlruns/` out of Git.
+
+Reason: Local MLflow tracking gives useful experiment evidence without adding a tracking server, model registry, cloud service or deployment workflow. The generated run metadata can grow quickly and is reproducible from local training runs, so it should remain uncommitted.
