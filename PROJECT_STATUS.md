@@ -2,9 +2,17 @@
 
 ## Current Phase
 
-Stage 6A MLflow experiment tracking added to training workflow.
+Stage 7A local prediction logging added to the FastAPI inference workflow.
 
 ## Completed in This Step
+
+- Added local JSONL prediction logging for successful `/predict` calls.
+- Logged prediction timestamp, request ID, churn probability, predicted class, risk label and selected monitoring features.
+- Added tests for the logging helper and `/predict` logging behaviour.
+- Kept prediction logs excluded from Git.
+- No drift detection, dashboard, database, cloud deployment or production monitoring added yet.
+
+## Previous Stage 6A Completion
 
 - Added local MLflow tracking to the training script.
 - Logged training parameters.
@@ -92,7 +100,7 @@ Stage 6A MLflow experiment tracking added to training workflow.
 
 ## Next Planned Task
 
-Stage 6B: review MLflow outputs and decide whether to add lightweight experiment comparison documentation, or proceed to prediction logging.
+Stage 7B: generate sample prediction traffic and prepare logs for simulated drift detection.
 
 ## Known Risks
 
@@ -105,7 +113,7 @@ Stage 6B: review MLflow outputs and decide whether to add lightweight experiment
 
 ## Current Status Summary
 
-The project now has local MLflow experiment tracking in the command-line training workflow. Training logs parameters, LogisticRegression metrics, DummyClassifier baseline metrics and generated local artifacts to file-based MLflow runs under `mlruns/`. No MLflow server, model registry, prediction logging, drift detection or dashboard code has been added yet.
+The project now has local JSONL prediction logging in the FastAPI inference workflow. Successful `/predict` calls append structured events to `logs/predictions.jsonl`, capturing prediction outputs and selected monitoring features for later simulated drift detection and dashboarding. No drift detection, dashboard, database, cloud deployment or production monitoring code has been added yet.
 
 ## Project Evidence and Validation Artifacts to Collect
 
@@ -134,3 +142,4 @@ The project now has local MLflow experiment tracking in the command-line trainin
 - 2026-07-04: Added Dockerfile and `.dockerignore` for Stage 5A local API containerisation.
 - 2026-07-05: Added GitHub Actions pytest workflow for Stage 5B.
 - 2026-07-06: Added local MLflow experiment tracking to the training workflow for Stage 6A.
+- 2026-07-07: Added local JSONL prediction logging for Stage 7A.

@@ -1,3 +1,4 @@
+import json
 import sys
 from pathlib import Path
 
@@ -45,7 +46,7 @@ def test_health_endpoint_returns_api_and_model_artifact_status() -> None:
     assert "model_artifact_exists" in response_json
 
 
-def test_predict_endpoint_returns_prediction_with_mocked_pipeline(monkeypatch) -> None:
+def test_predict_endpoint_returns_prediction_with_mocked_pipeline(monkeypatch, tmp_path) -> None:
     class FakeModelPipeline:
         def predict_proba(self, X):
             return np.array([[0.25, 0.75]])
@@ -57,6 +58,8 @@ def test_predict_endpoint_returns_prediction_with_mocked_pipeline(monkeypatch) -
         return FakeModelPipeline()
 
     monkeypatch.setattr(app_main, "load_model_pipeline", fake_load_model_pipeline)
+    log_path = tmp_path / "logs" / "predictions.jsonl"
+    monkeypatch.setattr(app_main, "PREDICTION_LOG_PATH", log_path)
     client = TestClient(app_main.app)
 
     response = client.post("/predict", json=valid_customer_payload())
@@ -69,6 +72,42 @@ def test_predict_endpoint_returns_prediction_with_mocked_pipeline(monkeypatch) -
     assert response_json["churn_probability"] == 0.75
     assert response_json["churn_prediction"] == 1
     assert response_json["risk_label"] == "high"
+
+
+def test_predict_endpoint_writes_prediction_log_with_mocked_pipeline(monkeypatch, tmp_path) -> None:
+    class FakeModelPipeline:
+        def predict_proba(self, X):
+            return np.array([[0.72, 0.28]])
+
+        def predict(self, X):
+            return np.array([0])
+
+    def fake_load_model_pipeline():
+        return FakeModelPipeline()
+
+    log_path = tmp_path / "logs" / "predictions.jsonl"
+    monkeypatch.setattr(app_main, "load_model_pipeline", fake_load_model_pipeline)
+    monkeypatch.setattr(app_main, "PREDICTION_LOG_PATH", log_path)
+    client = TestClient(app_main.app)
+
+    response = client.post("/predict", json=valid_customer_payload())
+
+    assert response.status_code == 200
+    lines = log_path.read_text(encoding="utf-8").splitlines()
+    assert len(lines) == 1
+
+    log_record = json.loads(lines[0])
+    assert log_record["churn_probability"] == 0.28
+    assert log_record["churn_prediction"] == 0
+    assert log_record["risk_label"] == "low"
+    assert log_record["monitoring_features"] == {
+        "tenure": 12,
+        "MonthlyCharges": 59.9,
+        "TotalCharges": 718.8,
+        "Contract": "Month-to-month",
+        "InternetService": "DSL",
+        "PaymentMethod": "Electronic check",
+    }
 
 
 def test_predict_endpoint_returns_503_when_model_artifact_is_missing(monkeypatch) -> None:

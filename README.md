@@ -185,6 +185,14 @@ Use `POST /predict` with a Telco customer JSON payload:
 }
 ```
 
+## Prediction Logging
+
+Each successful `POST /predict` call appends one JSONL event to `logs/predictions.jsonl`.
+
+Prediction log events include a UTC timestamp, request ID, model artifact path, churn probability, predicted class, risk label and selected monitoring features: `tenure`, `MonthlyCharges`, `TotalCharges`, `Contract`, `InternetService` and `PaymentMethod`.
+
+`logs/predictions.jsonl` is excluded from Git. These local logs are intended for later simulated drift detection and dashboarding. This is local prototype logging, not production observability.
+
 ## Run with Docker
 
 From the project root, generate the local model artifact:

@@ -9,7 +9,8 @@ from fastapi import FastAPI, HTTPException
 from sklearn.pipeline import Pipeline
 
 from app.schemas import FEATURE_COLUMNS, PredictionResponse, TelcoCustomerRequest
-from src.utils.paths import MODEL_ARTIFACT_PATH, PROJECT_ROOT
+from src.monitoring.prediction_logger import log_prediction_event
+from src.utils.paths import MODEL_ARTIFACT_PATH, PREDICTION_LOG_PATH, PROJECT_ROOT
 
 MODEL_ARTIFACT_RELATIVE_PATH = MODEL_ARTIFACT_PATH.relative_to(PROJECT_ROOT).as_posix()
 MISSING_MODEL_MESSAGE = (
@@ -35,12 +36,17 @@ def load_model_pipeline() -> Pipeline:
 
 def customer_to_dataframe(customer: TelcoCustomerRequest) -> pd.DataFrame:
     """Convert a request payload into a one-row DataFrame with training columns."""
-    if hasattr(customer, "model_dump"):
-        payload: dict[str, Any] = customer.model_dump()
-    else:
-        payload = customer.dict()
+    payload = customer_to_payload(customer)
 
     return pd.DataFrame([{column: payload[column] for column in FEATURE_COLUMNS}])
+
+
+def customer_to_payload(customer: TelcoCustomerRequest) -> dict[str, Any]:
+    """Convert a request payload into a plain dictionary."""
+    if hasattr(customer, "model_dump"):
+        return customer.model_dump()
+
+    return customer.dict()
 
 
 def risk_label_from_probability(churn_probability: float) -> str:
@@ -71,11 +77,22 @@ def predict(customer: TelcoCustomerRequest) -> PredictionResponse:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
     input_df = customer_to_dataframe(customer)
+    customer_payload = customer_to_payload(customer)
     churn_probability = float(model_pipeline.predict_proba(input_df)[0, 1])
     churn_prediction = int(model_pipeline.predict(input_df)[0])
+    risk_label = risk_label_from_probability(churn_probability)
+
+    log_prediction_event(
+        churn_probability=churn_probability,
+        churn_prediction=churn_prediction,
+        risk_label=risk_label,
+        customer_payload=customer_payload,
+        model_artifact_path=MODEL_ARTIFACT_RELATIVE_PATH,
+        log_path=PREDICTION_LOG_PATH,
+    )
 
     return PredictionResponse(
         churn_probability=churn_probability,
         churn_prediction=churn_prediction,
-        risk_label=risk_label_from_probability(churn_probability),
+        risk_label=risk_label,
     )

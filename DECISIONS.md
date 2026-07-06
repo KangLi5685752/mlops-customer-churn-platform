@@ -143,3 +143,9 @@ Reason: The test suite is intentionally independent of the raw Telco CSV and gen
 Decision: Log training parameters, metrics and generated artifacts to local file-based MLflow runs under `mlruns/`, while keeping `mlruns/` out of Git.
 
 Reason: Local MLflow tracking gives useful experiment evidence without adding a tracking server, model registry, cloud service or deployment workflow. The generated run metadata can grow quickly and is reproducible from local training runs, so it should remain uncommitted.
+
+## 2026-07-07: Use JSONL for local prediction logs
+
+Decision: Append successful API prediction events to `logs/predictions.jsonl` using one JSON object per line, while logging only selected monitoring features rather than the full raw request payload.
+
+Reason: JSONL is simple, append-friendly and easy to inspect locally. Logging a focused feature subset keeps the MVP more privacy-conscious while still creating useful input for later simulated drift detection. Prediction logs are generated runtime outputs and should remain out of Git.

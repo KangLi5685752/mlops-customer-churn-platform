@@ -36,3 +36,5 @@ RAW_DATA_PATH = PROJECT_ROOT / "data" / "raw" / DATASET_FILENAME
 REPORTS_DIR = PROJECT_ROOT / "reports"
 ARTIFACTS_DIR = PROJECT_ROOT / "artifacts"
 MODEL_ARTIFACT_PATH = ARTIFACTS_DIR / "model_pipeline.joblib"
+LOGS_DIR = PROJECT_ROOT / "logs"
+PREDICTION_LOG_PATH = LOGS_DIR / "predictions.jsonl"
