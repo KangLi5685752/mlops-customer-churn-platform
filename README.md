@@ -240,6 +240,44 @@ reports/drift_detection_summary.md
 
 This workflow uses local prediction logs from `logs/predictions.jsonl`. The current batch is simulated by applying controlled feature shifts, so this is for local MLOps portfolio demonstration and is not real production drift monitoring. `logs/predictions.jsonl` remains excluded from Git.
 
+## Streamlit Monitoring Dashboard
+
+Run the local dashboard workflow from the project root:
+
+1. Train the model:
+
+```bash
+python -m src.models.train
+```
+
+2. Start the FastAPI app:
+
+```bash
+python -m uvicorn app.main:app --reload
+```
+
+3. In a second terminal, generate sample prediction traffic:
+
+```bash
+python -m scripts.generate_sample_prediction_traffic --n 30
+```
+
+4. Run simulated drift detection:
+
+```bash
+python -m scripts.run_simulated_drift_detection
+```
+
+5. Start the dashboard:
+
+```bash
+python -m streamlit run dashboard/streamlit_app.py
+```
+
+Open the local Streamlit URL shown in the terminal.
+
+The dashboard reads `logs/predictions.jsonl` and `reports/drift_detection_results.json`. `logs/predictions.jsonl` is excluded from Git. The dashboard is a local prototype, not production monitoring or live alerting.
+
 ## Run with Docker
 
 From the project root, generate the local model artifact:

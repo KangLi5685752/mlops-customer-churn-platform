@@ -161,3 +161,9 @@ Reason: Sending traffic through the API ensures sample prediction logs are produ
 Decision: Add simple numerical mean-shift checks and categorical proportion-shift checks using a deterministic simulated current batch before adding any dashboard.
 
 Reason: There is no real production traffic in this local portfolio project. Simulated drift makes the monitoring workflow demonstrable while keeping thresholds transparent and clearly non-production.
+
+## 2026-07-08: Use Streamlit for the local monitoring dashboard
+
+Decision: Use a file-based Streamlit dashboard that reads local prediction logs and simulated drift reports instead of adding a database or production monitoring stack.
+
+Reason: Streamlit is lightweight and suitable for portfolio monitoring visualisation. Reading local files keeps the dashboard aligned with the MVP scope and makes it clear that this is local prototype evidence, not production observability.

@@ -2,9 +2,18 @@
 
 ## Current Phase
 
-Stage 8A simulated drift detection added.
+Stage 9A Streamlit monitoring dashboard MVP added.
 
 ## Completed in This Step
+
+- Added local Streamlit dashboard for prediction logs and simulated drift reports.
+- Displayed prediction event count, risk label distribution and churn probability summaries.
+- Displayed monitoring feature summaries.
+- Displayed numerical and categorical drift results.
+- Added tests for dashboard data helpers.
+- No production monitoring, live alerts, database, cloud deployment or authentication added.
+
+## Previous Stage 8A Completion
 
 - Added local drift detection utilities for prediction logs.
 - Added deterministic simulated current batch generation.
@@ -117,7 +126,7 @@ Stage 8A simulated drift detection added.
 
 ## Next Planned Task
 
-Stage 8B: review drift detection outputs and prepare for Streamlit monitoring dashboard.
+Stage 9B: dashboard polish and final documentation, or Stage 10: model card and risk register finalisation.
 
 ## Known Risks
 
@@ -130,7 +139,7 @@ Stage 8B: review drift detection outputs and prepare for Streamlit monitoring da
 
 ## Current Status Summary
 
-The project now has lightweight simulated drift detection using local prediction logs. The workflow builds a deterministic shifted current batch from `logs/predictions.jsonl`, computes transparent numerical and categorical drift checks and writes JSON and Markdown reports under `reports/`. No Streamlit dashboard, production monitoring, live alerts, database or cloud deployment code has been added yet.
+The project now has a local Streamlit monitoring dashboard MVP that reads `logs/predictions.jsonl` and `reports/drift_detection_results.json`. It visualises prediction volume, risk labels, churn probabilities, monitoring feature summaries and simulated numerical/categorical drift results. No production monitoring, live alerts, database, cloud deployment or authentication code has been added.
 
 ## Project Evidence and Validation Artifacts to Collect
 
@@ -162,3 +171,4 @@ The project now has lightweight simulated drift detection using local prediction
 - 2026-07-07: Added local JSONL prediction logging for Stage 7A.
 - 2026-07-07: Added synthetic local prediction traffic generation for Stage 7B.
 - 2026-07-07: Added simulated drift detection using local prediction logs for Stage 8A.
+- 2026-07-08: Added local Streamlit monitoring dashboard MVP for Stage 9A.

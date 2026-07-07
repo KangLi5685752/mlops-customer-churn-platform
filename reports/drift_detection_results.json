@@ -1,38 +1,38 @@
 {
-  "timestamp_utc": "2026-07-07T15:11:54.866905+00:00",
-  "reference_record_count": 92,
-  "current_record_count": 92,
+  "timestamp_utc": "2026-07-07T16:11:39.426978+00:00",
+  "reference_record_count": 122,
+  "current_record_count": 122,
   "simulation_note": "The current batch is simulated by applying deterministic feature shifts to local prediction logs. This is not real production drift monitoring.",
   "numerical_drift": {
     "tenure": {
-      "reference_mean": 26.1848,
-      "current_mean": 19.5217,
-      "absolute_difference": -6.663,
-      "percentage_difference": -0.2545,
+      "reference_mean": 26.2623,
+      "current_mean": 20.082,
+      "absolute_difference": -6.1803,
+      "percentage_difference": -0.2353,
       "threshold": 0.2,
       "drift_flag": true
     },
     "MonthlyCharges": {
-      "reference_mean": 59.6223,
-      "current_mean": 68.8889,
-      "absolute_difference": 9.2666,
-      "percentage_difference": 0.1554,
+      "reference_mean": 59.7029,
+      "current_mean": 68.1198,
+      "absolute_difference": 8.4169,
+      "percentage_difference": 0.141,
       "threshold": 0.2,
       "drift_flag": false
     },
     "TotalCharges": {
-      "reference_mean": 1197.6033,
-      "current_mean": 1020.5372,
-      "absolute_difference": -177.0661,
-      "percentage_difference": -0.1479,
+      "reference_mean": 1201.2049,
+      "current_mean": 1038.7666,
+      "absolute_difference": -162.4383,
+      "percentage_difference": -0.1352,
       "threshold": 0.2,
       "drift_flag": false
     },
     "churn_probability": {
-      "reference_mean": 0.3035,
-      "current_mean": 0.4535,
+      "reference_mean": 0.3031,
+      "current_mean": 0.4531,
       "absolute_difference": 0.15,
-      "percentage_difference": 0.4943,
+      "percentage_difference": 0.4948,
       "threshold": 0.2,
       "drift_flag": true
     }
@@ -40,46 +40,46 @@
   "categorical_drift": {
     "Contract": {
       "reference_distribution": {
-        "Month-to-month": 0.5109,
-        "One year": 0.163,
-        "Two year": 0.3261
+        "Month-to-month": 0.5082,
+        "One year": 0.1639,
+        "Two year": 0.3279
       },
       "current_distribution": {
-        "Month-to-month": 0.837,
-        "One year": 0.0543,
-        "Two year": 0.1087
+        "Month-to-month": 0.8361,
+        "One year": 0.0492,
+        "Two year": 0.1148
       },
-      "max_absolute_proportion_difference": 0.3261,
+      "max_absolute_proportion_difference": 0.3279,
       "threshold": 0.25,
       "drift_flag": true
     },
     "InternetService": {
       "reference_distribution": {
-        "DSL": 0.5109,
-        "Fiber optic": 0.3261,
-        "No": 0.163
+        "DSL": 0.5082,
+        "Fiber optic": 0.3279,
+        "No": 0.1639
       },
       "current_distribution": {
-        "DSL": 0.1739,
-        "Fiber optic": 0.7935,
-        "No": 0.0326
+        "DSL": 0.1721,
+        "Fiber optic": 0.7869,
+        "No": 0.041
       },
-      "max_absolute_proportion_difference": 0.4674,
+      "max_absolute_proportion_difference": 0.459,
       "threshold": 0.25,
       "drift_flag": true
     },
     "PaymentMethod": {
       "reference_distribution": {
-        "Bank transfer (automatic)": 0.3261,
-        "Credit card (automatic)": 0.163,
-        "Electronic check": 0.3478,
-        "Mailed check": 0.163
+        "Bank transfer (automatic)": 0.3279,
+        "Credit card (automatic)": 0.1639,
+        "Electronic check": 0.3443,
+        "Mailed check": 0.1639
       },
       "current_distribution": {
-        "Bank transfer (automatic)": 0.3261,
-        "Credit card (automatic)": 0.163,
-        "Electronic check": 0.3478,
-        "Mailed check": 0.163
+        "Bank transfer (automatic)": 0.3279,
+        "Credit card (automatic)": 0.1639,
+        "Electronic check": 0.3443,
+        "Mailed check": 0.1639
       },
       "max_absolute_proportion_difference": 0.0,
       "threshold": 0.25,
@@ -87,16 +87,16 @@
     },
     "risk_label": {
       "reference_distribution": {
-        "high": 0.163,
-        "low": 0.663,
-        "medium": 0.1739
+        "high": 0.1639,
+        "low": 0.6639,
+        "medium": 0.1721
       },
       "current_distribution": {
-        "high": 0.163,
-        "low": 0.3261,
-        "medium": 0.5109
+        "high": 0.1639,
+        "low": 0.3279,
+        "medium": 0.5082
       },
-      "max_absolute_proportion_difference": 0.337,
+      "max_absolute_proportion_difference": 0.3361,
       "threshold": 0.25,
       "drift_flag": true
     }
