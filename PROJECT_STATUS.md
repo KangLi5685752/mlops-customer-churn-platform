@@ -2,9 +2,16 @@
 
 ## Current Phase
 
-Stage 9A Streamlit monitoring dashboard MVP added.
+Stage 9B final README and portfolio evidence polish.
 
 ## Completed in This Step
+
+- README workflow clarified.
+- Project evidence summary added.
+- Reproducibility workflow documented.
+- Limitations and safe claims clarified.
+
+## Previous Stage 9A Completion
 
 - Added local Streamlit dashboard for prediction logs and simulated drift reports.
 - Displayed prediction event count, risk label distribution and churn probability summaries.
@@ -126,7 +133,7 @@ Stage 9A Streamlit monitoring dashboard MVP added.
 
 ## Next Planned Task
 
-Stage 9B: dashboard polish and final documentation, or Stage 10: model card and risk register finalisation.
+Stage 10A: finalise model card and risk register.
 
 ## Known Risks
 
@@ -139,7 +146,7 @@ Stage 9B: dashboard polish and final documentation, or Stage 10: model card and 
 
 ## Current Status Summary
 
-The project now has a local Streamlit monitoring dashboard MVP that reads `logs/predictions.jsonl` and `reports/drift_detection_results.json`. It visualises prediction volume, risk labels, churn probabilities, monitoring feature summaries and simulated numerical/categorical drift results. No production monitoring, live alerts, database, cloud deployment or authentication code has been added.
+The project README now documents the full local MLOps workflow, architecture, reproducibility steps, evidence artifacts and safe portfolio claims. The project remains a local prototype with no production deployment, live monitoring, database, cloud infrastructure or authentication code added.
 
 ## Project Evidence and Validation Artifacts to Collect
 
@@ -172,3 +179,4 @@ The project now has a local Streamlit monitoring dashboard MVP that reads `logs/
 - 2026-07-07: Added synthetic local prediction traffic generation for Stage 7B.
 - 2026-07-07: Added simulated drift detection using local prediction logs for Stage 8A.
 - 2026-07-08: Added local Streamlit monitoring dashboard MVP for Stage 9A.
+- 2026-07-08: Polished README workflow and added project evidence summary for Stage 9B.

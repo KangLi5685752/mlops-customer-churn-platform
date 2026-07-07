@@ -6,6 +6,87 @@ This project turns a notebook-based customer churn prediction baseline into a re
 
 The project is a local prototype, not a real production deployment. It will avoid claims of real business impact, real company deployment or real customer retention improvement.
 
+## Project Architecture
+
+The local workflow follows this path:
+
+```text
+Raw Telco CSV
+-> training pipeline
+-> saved model artifact
+-> FastAPI inference service
+-> prediction logs
+-> simulated drift detection
+-> Streamlit dashboard
+```
+
+MLflow records local training experiment metadata under `mlruns/`. GitHub Actions runs the pytest suite automatically on push and pull request. Docker packages the local FastAPI API service using the locally generated model artifact. This is a local MLOps prototype, not a production deployment.
+
+## Reproducibility Workflow
+
+From the project root:
+
+1. Install dependencies:
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+2. Add the raw Telco CSV:
+
+```text
+data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv
+```
+
+3. Run tests:
+
+```bash
+python -m pytest
+```
+
+4. Train the model:
+
+```bash
+python -m src.models.train
+```
+
+5. Evaluate the model:
+
+```bash
+python -m src.models.evaluate
+```
+
+6. Start the API:
+
+```bash
+python -m uvicorn app.main:app --reload
+```
+
+7. Generate sample prediction traffic:
+
+```bash
+python -m scripts.generate_sample_prediction_traffic --n 30
+```
+
+8. Run simulated drift detection:
+
+```bash
+python -m scripts.run_simulated_drift_detection
+```
+
+9. Start the dashboard:
+
+```bash
+python -m streamlit run dashboard/streamlit_app.py
+```
+
+10. Optionally run the local API with Docker:
+
+```bash
+docker build -t mlops-customer-churn-api .
+docker run --rm -p 8000:8000 mlops-customer-churn-api
+```
+
 ## Real-World Problem Framing
 
 Customer churn prediction is a common machine learning problem in subscription-based businesses such as telecom, SaaS, streaming services and membership platforms. These businesses often want to identify customers who may stop using the service so that support, retention or account teams can review the situation.
@@ -349,6 +430,40 @@ Engineering and MLOps quality will be evaluated using local benchmarking, tests 
 - prediction log generation
 - drift detection output under simulated feature shifts
 
+## Project Evidence
+
+Generated evidence files:
+
+- `reports/baseline_summary.md`
+- `reports/training_metrics.json`
+- `reports/evaluation_summary.md`
+- `reports/mlflow_run_summary.md`
+- `reports/sample_prediction_traffic_summary.md`
+- `reports/drift_detection_results.json`
+- `reports/drift_detection_summary.md`
+- `reports/project_evidence_summary.md`
+
+Additional local evidence to capture manually:
+
+- GitHub Actions green run screenshot
+- MLflow UI screenshot
+- FastAPI `/docs` screenshot
+- Streamlit dashboard screenshot
+- Docker build/run terminal output
+
+## What This Project Demonstrates
+
+- Reproducible model training and evaluation with a saved scikit-learn pipeline.
+- Testable data cleaning, preprocessing, model-pipeline and API behaviour.
+- FastAPI model serving with Pydantic request validation.
+- Dockerised local API serving.
+- GitHub Actions CI running `python -m pytest`.
+- Local MLflow experiment tracking.
+- Local JSONL prediction logging.
+- Synthetic sample prediction traffic generation.
+- Simulated drift detection from local prediction logs.
+- Local Streamlit monitoring dashboard for prediction and drift evidence.
+
 ## Out-of-Scope Items for MVP
 
 The MVP will not include:
@@ -363,9 +478,11 @@ The MVP will not include:
 
 ## Limitations and Responsible Use Notes
 
-The Telco Customer Churn dataset is small and public, so results from this project should not be treated as evidence of real production performance. Simulated production traffic is useful for demonstrating engineering workflows, but it is not the same as real production traffic.
+The Telco Customer Churn dataset is small and public, so results from this project should not be treated as evidence of real production performance. The project does not use real customer data, real production traffic or cloud infrastructure.
 
-Model predictions should support human review rather than automatically decide customer treatment. False positives and false negatives have different business implications. For example, a false positive could lead to unnecessary retention action, while a false negative could miss a customer who may churn. Drift monitoring in this project will be simulated and should be interpreted as a portfolio demonstration rather than a complete production monitoring system.
+There is no real production deployment, live production monitoring, validated business retention policy or automated customer treatment workflow. Model predictions should support human review rather than automatically decide customer treatment. False positives and false negatives have different business implications. For example, a false positive could lead to unnecessary retention action, while a false negative could miss a customer who may churn.
+
+Prediction traffic is synthetic local sample traffic. Drift detection is simulated, uses simple demonstration thresholds and does not use ground-truth labels. The Streamlit dashboard is a local prototype for portfolio evidence, not production observability or live alerting.
 
 ## Development Roadmap
 
