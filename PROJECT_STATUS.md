@@ -2,9 +2,18 @@
 
 ## Current Phase
 
-Stage 7B sample prediction traffic generation added.
+Stage 8A simulated drift detection added.
 
 ## Completed in This Step
+
+- Added local drift detection utilities for prediction logs.
+- Added deterministic simulated current batch generation.
+- Added numerical and categorical drift checks.
+- Generated drift detection JSON and Markdown reports.
+- Added tests for drift detection utilities.
+- No Streamlit dashboard, production monitoring, live alerts, database or cloud deployment added yet.
+
+## Previous Stage 7B Completion
 
 - Added script to send synthetic Telco payloads to the local `/predict` endpoint.
 - Generated sample prediction events through the API logging workflow.
@@ -108,7 +117,7 @@ Stage 7B sample prediction traffic generation added.
 
 ## Next Planned Task
 
-Stage 8A: add simulated drift detection using generated prediction logs.
+Stage 8B: review drift detection outputs and prepare for Streamlit monitoring dashboard.
 
 ## Known Risks
 
@@ -121,7 +130,7 @@ Stage 8A: add simulated drift detection using generated prediction logs.
 
 ## Current Status Summary
 
-The project now has a local sample traffic generator that sends synthetic Telco payloads through the FastAPI `/predict` endpoint. This populates `logs/predictions.jsonl` through the same API logging workflow used during inference and writes a summary to `reports/sample_prediction_traffic_summary.md`. No drift detection, dashboard, database, cloud deployment or production monitoring code has been added yet.
+The project now has lightweight simulated drift detection using local prediction logs. The workflow builds a deterministic shifted current batch from `logs/predictions.jsonl`, computes transparent numerical and categorical drift checks and writes JSON and Markdown reports under `reports/`. No Streamlit dashboard, production monitoring, live alerts, database or cloud deployment code has been added yet.
 
 ## Project Evidence and Validation Artifacts to Collect
 
@@ -152,3 +161,4 @@ The project now has a local sample traffic generator that sends synthetic Telco 
 - 2026-07-06: Added local MLflow experiment tracking to the training workflow for Stage 6A.
 - 2026-07-07: Added local JSONL prediction logging for Stage 7A.
 - 2026-07-07: Added synthetic local prediction traffic generation for Stage 7B.
+- 2026-07-07: Added simulated drift detection using local prediction logs for Stage 8A.

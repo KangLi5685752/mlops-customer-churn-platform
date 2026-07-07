@@ -155,3 +155,9 @@ Reason: JSONL is simple, append-friendly and easy to inspect locally. Logging a 
 Decision: Generate synthetic local sample prediction traffic by sending valid Telco payloads to the running FastAPI `/predict` endpoint instead of writing prediction logs directly.
 
 Reason: Sending traffic through the API ensures sample prediction logs are produced by the same path used during inference. The generated traffic is synthetic local traffic for monitoring demonstrations, not production traffic.
+
+## 2026-07-07: Use transparent simulated drift checks before dashboarding
+
+Decision: Add simple numerical mean-shift checks and categorical proportion-shift checks using a deterministic simulated current batch before adding any dashboard.
+
+Reason: There is no real production traffic in this local portfolio project. Simulated drift makes the monitoring workflow demonstrable while keeping thresholds transparent and clearly non-production.

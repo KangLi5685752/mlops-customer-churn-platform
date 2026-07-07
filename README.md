@@ -217,6 +217,29 @@ Prediction events are appended to `logs/predictions.jsonl`, and a summary is wri
 
 `logs/predictions.jsonl` is excluded from Git. The generated traffic is synthetic local sample traffic intended to support later simulated drift detection and dashboarding. It is not real production traffic.
 
+## Simulated Drift Detection
+
+Generate prediction logs first:
+
+```bash
+python -m scripts.generate_sample_prediction_traffic --n 30
+```
+
+Run simulated drift detection:
+
+```bash
+python -m scripts.run_simulated_drift_detection
+```
+
+Outputs:
+
+```text
+reports/drift_detection_results.json
+reports/drift_detection_summary.md
+```
+
+This workflow uses local prediction logs from `logs/predictions.jsonl`. The current batch is simulated by applying controlled feature shifts, so this is for local MLOps portfolio demonstration and is not real production drift monitoring. `logs/predictions.jsonl` remains excluded from Git.
+
 ## Run with Docker
 
 From the project root, generate the local model artifact:
