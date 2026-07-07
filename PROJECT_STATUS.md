@@ -2,9 +2,16 @@
 
 ## Current Phase
 
-Stage 9B final README and portfolio evidence polish.
+Stage 10A model card and risk register finalised.
 
 ## Completed in This Step
+
+- Finalised model card with intended use, metrics, inputs/outputs, monitoring notes and limitations.
+- Finalised risk register covering model performance, governance, monitoring, data validity, privacy and communication risks.
+- Clarified that the project remains a local MLOps prototype, not production deployment.
+- No new model, API, dashboard, Docker or CI functionality added.
+
+## Previous Stage 9B Completion
 
 - README workflow clarified.
 - Project evidence summary added.
@@ -133,7 +140,7 @@ Stage 9B final README and portfolio evidence polish.
 
 ## Next Planned Task
 
-Stage 10A: finalise model card and risk register.
+Stage 10B: final portfolio wording, CV bullets and interview STAR story.
 
 ## Known Risks
 
@@ -146,7 +153,7 @@ Stage 10A: finalise model card and risk register.
 
 ## Current Status Summary
 
-The project README now documents the full local MLOps workflow, architecture, reproducibility steps, evidence artifacts and safe portfolio claims. The project remains a local prototype with no production deployment, live monitoring, database, cloud infrastructure or authentication code added.
+The model card and risk register are now finalised for the local MLOps prototype. They document intended use, known metrics, input/output assumptions, monitoring limitations, ethical considerations and residual risks without claiming production deployment or production governance.
 
 ## Project Evidence and Validation Artifacts to Collect
 
@@ -180,3 +187,4 @@ The project README now documents the full local MLOps workflow, architecture, re
 - 2026-07-07: Added simulated drift detection using local prediction logs for Stage 8A.
 - 2026-07-08: Added local Streamlit monitoring dashboard MVP for Stage 9A.
 - 2026-07-08: Polished README workflow and added project evidence summary for Stage 9B.
+- 2026-07-08: Finalised model card and risk register for Stage 10A.

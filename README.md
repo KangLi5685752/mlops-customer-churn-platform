@@ -388,7 +388,7 @@ http://127.0.0.1:8000/docs
 
 The Docker image uses the locally generated `artifacts/model_pipeline.joblib`. The raw dataset is not copied into the image. The Dockerfile does not train the model. This is a local containerised API prototype, not a cloud deployment.
 
-## Planned MLOps Components
+## Implemented MLOps Components
 
 The planned MLOps components are:
 
@@ -441,6 +441,8 @@ Generated evidence files:
 - `reports/sample_prediction_traffic_summary.md`
 - `reports/drift_detection_results.json`
 - `reports/drift_detection_summary.md`
+- `reports/model_card.md`
+- `reports/risk_register.md`
 - `reports/project_evidence_summary.md`
 
 Additional local evidence to capture manually:

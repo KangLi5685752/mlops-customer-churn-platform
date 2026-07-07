@@ -43,6 +43,8 @@ docker run --rm -p 8000:8000 mlops-customer-churn-api
 - `reports/sample_prediction_traffic_summary.md`
 - `reports/drift_detection_results.json`
 - `reports/drift_detection_summary.md`
+- `reports/model_card.md`
+- `reports/risk_register.md`
 - `reports/project_evidence_summary.md`
 
 ## Local Evidence to Capture Manually
