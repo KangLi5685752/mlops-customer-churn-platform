@@ -1,7 +1,7 @@
 # MLflow Run Summary
 
 - Experiment name: `telco-churn-baseline`
-- Run ID: `14d12c6444db42e1a253b6a740b6b7d0`
+- Run ID: `80414cbe336e435bb33e629edf882151`
 - Logged model type: `LogisticRegression`
 - Baseline model: `DummyClassifier`
 - Model artifact path: `artifacts/model_pipeline.joblib`

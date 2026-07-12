@@ -2,9 +2,17 @@
 
 ## Current Phase
 
-Stage 10A model card and risk register finalised.
+Stage 10B local API latency benchmark evidence added.
 
 ## Completed in This Step
+
+- Added a local synthetic API latency benchmark script for the FastAPI `/predict` endpoint.
+- The benchmark sends sequential synthetic Telco-like requests and reports average, p50, p95, minimum and maximum latency.
+- The benchmark counts successful and failed requests and reports success rate.
+- Benchmark output is written to `reports/api_latency_benchmark.json` and `reports/api_latency_benchmark.md`.
+- Clarified that the benchmark is local synthetic evidence, not a production performance test or production deployment.
+
+## Previous Stage 10A Completion
 
 - Finalised model card with intended use, metrics, inputs/outputs, monitoring notes and limitations.
 - Finalised risk register covering model performance, governance, monitoring, data validity, privacy and communication risks.
@@ -140,7 +148,7 @@ Stage 10A model card and risk register finalised.
 
 ## Next Planned Task
 
-Stage 10B: final portfolio wording, CV bullets and interview STAR story.
+Stage 10C: final portfolio wording, CV bullets and interview STAR story.
 
 ## Known Risks
 
@@ -153,7 +161,7 @@ Stage 10B: final portfolio wording, CV bullets and interview STAR story.
 
 ## Current Status Summary
 
-The model card and risk register are now finalised for the local MLOps prototype. They document intended use, known metrics, input/output assumptions, monitoring limitations, ethical considerations and residual risks without claiming production deployment or production governance.
+The project now includes a local synthetic API latency benchmark for `/predict`, alongside the finalised model card and risk register. The benchmark adds evidence for API responsiveness in a local prototype setting without claiming production performance or deployment.
 
 ## Project Evidence and Validation Artifacts to Collect
 
@@ -188,3 +196,4 @@ The model card and risk register are now finalised for the local MLOps prototype
 - 2026-07-08: Added local Streamlit monitoring dashboard MVP for Stage 9A.
 - 2026-07-08: Polished README workflow and added project evidence summary for Stage 9B.
 - 2026-07-08: Finalised model card and risk register for Stage 10A.
+- 2026-07-11: Added local synthetic API latency benchmarking evidence for Stage 10B.

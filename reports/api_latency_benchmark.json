@@ -1,0 +1,16 @@
+{
+  "api_url": "http://127.0.0.1:8000/predict",
+  "average_latency_ms": 9.815,
+  "benchmark_type": "local_synthetic_api_latency",
+  "latency_metrics_scope": "successful requests only",
+  "max_latency_ms": 28.429,
+  "min_latency_ms": 8.023,
+  "note": "This is a local synthetic benchmark, not a production performance test.",
+  "p50_latency_ms": 9.376,
+  "p95_latency_ms": 12.205,
+  "requests_attempted": 100,
+  "requests_failed": 0,
+  "requests_succeeded": 100,
+  "success_rate": 1.0,
+  "timestamp_utc": "2026-07-12T14:33:07.919234+00:00"
+}

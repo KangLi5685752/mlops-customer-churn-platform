@@ -298,6 +298,29 @@ Prediction events are appended to `logs/predictions.jsonl`, and a summary is wri
 
 `logs/predictions.jsonl` is excluded from Git. The generated traffic is synthetic local sample traffic intended to support later simulated drift detection and dashboarding. It is not real production traffic.
 
+## Local API Latency Benchmark
+
+Start the FastAPI app first:
+
+```bash
+python -m uvicorn app.main:app --reload
+```
+
+In a second terminal, run the local synthetic benchmark:
+
+```bash
+python -m scripts.benchmark_api_latency --n 100
+```
+
+The benchmark sends sequential synthetic Telco-like requests to `POST /predict` and writes:
+
+```text
+reports/api_latency_benchmark.json
+reports/api_latency_benchmark.md
+```
+
+These are local benchmark results based on synthetic requests. They are not production performance results or evidence of production deployment.
+
 ## Simulated Drift Detection
 
 Generate prediction logs first:
@@ -432,13 +455,15 @@ Engineering and MLOps quality will be evaluated using local benchmarking, tests 
 
 ## Project Evidence
 
-Generated evidence files:
+Generated evidence files, after running the relevant local commands:
 
 - `reports/baseline_summary.md`
 - `reports/training_metrics.json`
 - `reports/evaluation_summary.md`
 - `reports/mlflow_run_summary.md`
 - `reports/sample_prediction_traffic_summary.md`
+- `reports/api_latency_benchmark.json`
+- `reports/api_latency_benchmark.md`
 - `reports/drift_detection_results.json`
 - `reports/drift_detection_summary.md`
 - `reports/model_card.md`
