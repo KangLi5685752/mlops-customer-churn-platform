@@ -167,3 +167,27 @@ Reason: There is no real production traffic in this local portfolio project. Sim
 Decision: Use a file-based Streamlit dashboard that reads local prediction logs and simulated drift reports instead of adding a database or production monitoring stack.
 
 Reason: Streamlit is lightweight and suitable for portfolio monitoring visualisation. Reading local files keeps the dashboard aligned with the MVP scope and makes it clear that this is local prototype evidence, not production observability.
+
+## 2026-08-12: Use Azure as the first cloud platform
+
+Decision: Use the Azure for Students subscription as the first cloud platform for Stage 11, with Azure Container Registry and Azure Container Apps as the cloud MVP direction.
+
+Reason: The existing API is already containerised, and this direction provides a focused path to demonstrate a cost-controlled cloud deployment without adding Kubernetes administration or unrelated infrastructure.
+
+## 2026-08-12: Deploy Stage 11 resources in UK South
+
+Decision: Use UK South for Stage 11 resources where the selected Azure service supports it.
+
+Reason: A single selected region keeps resource management, cost review, evidence collection and teardown simpler for the portfolio MVP.
+
+## 2026-08-12: Use GitHub OIDC with least-privilege deployment access
+
+Decision: Authenticate future GitHub Actions deployment through OIDC federation using `id-github-mlops-churn`, with permissions scoped as narrowly as practical to `rg-mlops-churn-portfolio`.
+
+Reason: OIDC avoids storing long-lived Azure client secrets in GitHub. Pull request workflows must not deploy, and normal CI/CD deployment does not require subscription-wide Owner access.
+
+## 2026-08-12: Use a cost-controlled, teardown-first cloud MVP
+
+Decision: Treat the Azure deployment as temporary, cost-controlled portfolio evidence and plan teardown before provisioning runtime resources.
+
+Reason: The Azure for Students credit is limited. The £10 monthly budget and actual-cost alerts provide guardrails, while deleting project resources after evidence collection limits unnecessary ongoing spend. This remains a cloud deployment MVP, not an enterprise production deployment.

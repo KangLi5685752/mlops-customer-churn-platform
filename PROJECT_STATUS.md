@@ -2,9 +2,23 @@
 
 ## Current Phase
 
-Stage 10B local API latency benchmark evidence added.
+Stage 11.0 Azure cloud preparation, documentation and guardrails.
 
 ## Completed in This Step
+
+- Documented the Stage 11 Azure deployment plan, resource naming convention, cost guardrails and security constraints.
+- Documented an unchecked teardown checklist for use after future cloud MVP evidence collection.
+- Selected Azure Container Registry and Azure Container Apps as the intended cloud MVP direction in UK South.
+- Recorded GitHub OIDC federation and narrowly scoped resource-group permissions as requirements for future deployment automation.
+- Confirmed that `rg-mlops-churn-portfolio` has been created in UK South.
+- No Azure deployment code or deployment workflow has been added, and no cloud runtime or workload resources such as ACR, Container Apps, Log Analytics or the deployment identity have been provisioned yet.
+
+## Local MLOps Workflow Completion
+
+- The local workflow from baseline experimentation through reusable training and evaluation, API serving, tests, Docker packaging, pytest CI, MLflow tracking, prediction logging, simulated drift monitoring, dashboarding, documentation and local API latency benchmarking is complete.
+- Local evidence remains portfolio MVP evidence and does not represent production traffic, a production SLA or real customer impact.
+
+## Previous Stage 10B Completion
 
 - Added a local synthetic API latency benchmark script for the FastAPI `/predict` endpoint.
 - The benchmark sends sequential synthetic Telco-like requests and reports average, p50, p95, minimum and maximum latency.
@@ -148,7 +162,7 @@ Stage 10B local API latency benchmark evidence added.
 
 ## Next Planned Task
 
-Stage 10C: final portfolio wording, CV bullets and interview STAR story.
+Stage 11.1: audit cloud build readiness before provisioning runtime resources, focusing on the Docker image's dependency on the Git-ignored model artifact and defining a reproducible artifact strategy for future Azure/GitHub Actions builds.
 
 ## Known Risks
 
@@ -161,7 +175,7 @@ Stage 10C: final portfolio wording, CV bullets and interview STAR story.
 
 ## Current Status Summary
 
-The project now includes a local synthetic API latency benchmark for `/predict`, alongside the finalised model card and risk register. The benchmark adds evidence for API responsiveness in a local prototype setting without claiming production performance or deployment.
+The local MLOps workflow is complete. Stage 11.0 has documented the intended cost-controlled Azure cloud deployment MVP, security guardrails, resource names and teardown procedure. The resource group `rg-mlops-churn-portfolio` has been created in UK South, but no cloud runtime or workload resources such as ACR, Container Apps, Log Analytics or the deployment identity have been provisioned yet.
 
 ## Project Evidence and Validation Artifacts to Collect
 
@@ -197,3 +211,4 @@ The project now includes a local synthetic API latency benchmark for `/predict`,
 - 2026-07-08: Polished README workflow and added project evidence summary for Stage 9B.
 - 2026-07-08: Finalised model card and risk register for Stage 10A.
 - 2026-07-11: Added local synthetic API latency benchmarking evidence for Stage 10B.
+- 2026-08-12: Documented Azure deployment guardrails and teardown planning for Stage 11.0 after creating `rg-mlops-churn-portfolio` in UK South; no cloud runtime or workload resources were provisioned.
