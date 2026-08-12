@@ -1,7 +1,23 @@
-name: Azure Manual Deployment
+name: Azure Deployment
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "app/**"
+      - "src/**"
+      - "Dockerfile"
+      - ".dockerignore"
+      - "requirements.txt"
+      - "deployment/model_artifact.json"
+      - "scripts/fetch_model_artifact.py"
+      - ".github/workflows/azure-deploy.yml"
+
+concurrency:
+  group: azure-container-app-deployment
+  cancel-in-progress: false
 
 permissions:
   contents: read
