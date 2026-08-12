@@ -25,3 +25,21 @@ jobs:
       - name: Run tests
         run: |
           python -m pytest
+
+      - name: Retrieve and verify model artifact for PR Docker build
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m scripts.fetch_model_artifact
+
+          if [[ ! -f artifacts/model_pipeline.joblib ]]; then
+            echo "::error::Verified model artifact was not installed at artifacts/model_pipeline.joblib."
+            exit 1
+          fi
+
+          echo "Verified model artifact is present for PR Docker build validation."
+
+      - name: Validate Docker build for pull request
+        if: github.event_name == 'pull_request'
+        run: docker build --tag mlops-churn-api:pr-validation .
