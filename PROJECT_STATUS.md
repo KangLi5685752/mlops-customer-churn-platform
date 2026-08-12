@@ -2,9 +2,19 @@
 
 ## Current Phase
 
-Stage 11.0 Azure cloud preparation, documentation and guardrails.
+Stage 11.1B-2 deployment artifact manifest and retrieval/verification foundation completed locally.
 
 ## Completed in This Step
+
+- Added a machine-readable deployment artifact manifest with validated provenance, metrics, compatibility versions and authoritative SHA-256 checksum.
+- Added a standard-library retrieval script for a future pinned GitHub Release asset.
+- The retrieval path downloads to a temporary file and installs the artifact only after SHA-256 verification.
+- Pinned scikit-learn 1.7.2 and joblib 1.5.3 for compatibility with the validated deployment artifact.
+- Added offline tests for manifest loading, release URL construction, checksum verification and mismatch rejection.
+- Recorded `model-v1.0.0` as planned but not yet published.
+- No GitHub Release, Azure runtime resource or deployment workflow has been created by this step.
+
+## Previous Stage 11.0 Completion
 
 - Documented the Stage 11 Azure deployment plan, resource naming convention, cost guardrails and security constraints.
 - Documented an unchecked teardown checklist for use after future cloud MVP evidence collection.
@@ -162,7 +172,7 @@ Stage 11.0 Azure cloud preparation, documentation and guardrails.
 
 ## Next Planned Task
 
-Stage 11.1: audit cloud build readiness before provisioning runtime resources, focusing on the Docker image's dependency on the Git-ignored model artifact and defining a reproducible artifact strategy for future Azure/GitHub Actions builds.
+Stage 11.1B-3: in a separately authorised step, publish the validated `model_pipeline.joblib` as the `model-v1.0.0` GitHub Release asset and validate clean-runner retrieval before adding Azure deployment automation.
 
 ## Known Risks
 
@@ -175,7 +185,7 @@ Stage 11.1: audit cloud build readiness before provisioning runtime resources, f
 
 ## Current Status Summary
 
-The local MLOps workflow is complete. Stage 11.0 has documented the intended cost-controlled Azure cloud deployment MVP, security guardrails, resource names and teardown procedure. The resource group `rg-mlops-churn-portfolio` has been created in UK South, but no cloud runtime or workload resources such as ACR, Container Apps, Log Analytics or the deployment identity have been provisioned yet.
+The local MLOps workflow is complete. Stage 11.1B-2 now defines a versioned deployment artifact manifest and checksum-gated retrieval foundation for future clean builds. The `model-v1.0.0` release is planned but not published. The resource group `rg-mlops-churn-portfolio` exists in UK South, but no cloud runtime or workload resources such as ACR, Container Apps, Log Analytics or the deployment identity have been provisioned yet.
 
 ## Project Evidence and Validation Artifacts to Collect
 
@@ -212,3 +222,4 @@ The local MLOps workflow is complete. Stage 11.0 has documented the intended cos
 - 2026-07-08: Finalised model card and risk register for Stage 10A.
 - 2026-07-11: Added local synthetic API latency benchmarking evidence for Stage 10B.
 - 2026-08-12: Documented Azure deployment guardrails and teardown planning for Stage 11.0 after creating `rg-mlops-churn-portfolio` in UK South; no cloud runtime or workload resources were provisioned.
+- 2026-08-12: Added the Stage 11.1B-2 deployment artifact manifest, compatibility pins and offline checksum-verification foundation; the planned model release was not published.

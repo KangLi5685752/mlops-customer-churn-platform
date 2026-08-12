@@ -72,6 +72,12 @@ Deployment permissions should be scoped as narrowly as practical to `rg-mlops-ch
 - Redact sensitive values from terminal output, screenshots and portfolio evidence.
 - Prefer Azure identity and role-based access control over registry admin credentials or embedded passwords.
 
+## Cloud Build Artifact Guardrail
+
+The validated `model_pipeline.joblib` remains outside Git. Its provenance, runtime compatibility and authoritative SHA-256 checksum are recorded in `deployment/model_artifact.json`. The planned `model-v1.0.0` GitHub Release has not yet been published.
+
+Before any future Docker build on a clean runner, the pinned release asset must be downloaded to a temporary file and verified against the manifest checksum. It may only be installed at `artifacts/model_pipeline.joblib` after verification succeeds. Deployment builds must never load an unverified joblib/pickle artifact. This foundation does not provision Azure runtime resources or add deployment automation.
+
 ## Explicitly Out of Scope
 
 Stage 11.0 does not implement or add:
@@ -88,13 +94,15 @@ Stage 11.0 does not implement or add:
 ## Intended Stage 11 Sequence
 
 1. Stage 11.0: record Azure scope, names, security decisions, cost controls and teardown requirements.
-2. Validate the Azure subscription context, UK South service availability, required providers and global availability of the planned ACR name.
-3. Create only the approved ACR, Log Analytics and Container Apps resources within `rg-mlops-churn-portfolio` using cost-conscious settings.
-4. Build and publish the existing API image without committing the raw dataset or local model artifacts to Git.
-5. Deploy the container app and validate `/health`, `/docs` and `/predict` with synthetic requests.
-6. Configure `id-github-mlops-churn` with GitHub OIDC federation and narrowly scoped resource-group deployment permissions.
-7. Add a deployment workflow that cannot deploy from pull request events, then validate the intended CI/CD path.
-8. Collect cost, deployment and basic observability evidence using careful portfolio wording.
-9. Follow `docs/azure_teardown_checklist.md` when a live endpoint is no longer required, then verify remaining resources and costs.
+2. Define and validate the versioned deployment artifact manifest and checksum-gated retrieval process before provisioning runtime resources.
+3. Publish the validated artifact separately only after explicit approval and verify retrieval on a clean runner.
+4. Validate the Azure subscription context, UK South service availability, required providers and global availability of the planned ACR name.
+5. Create only the approved ACR, Log Analytics and Container Apps resources within `rg-mlops-churn-portfolio` using cost-conscious settings.
+6. Build and publish the existing API image without committing the raw dataset or local model artifacts to Git.
+7. Deploy the container app and validate `/health`, `/docs` and `/predict` with synthetic requests.
+8. Configure `id-github-mlops-churn` with GitHub OIDC federation and narrowly scoped resource-group deployment permissions.
+9. Add a deployment workflow that cannot deploy from pull request events, then validate the intended CI/CD path.
+10. Collect cost, deployment and basic observability evidence using careful portfolio wording.
+11. Follow `docs/azure_teardown_checklist.md` when a live endpoint is no longer required, then verify remaining resources and costs.
 
 Each later step requires separate implementation and validation. None of those steps is marked complete by this plan.

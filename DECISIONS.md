@@ -191,3 +191,9 @@ Reason: OIDC avoids storing long-lived Azure client secrets in GitHub. Pull requ
 Decision: Treat the Azure deployment as temporary, cost-controlled portfolio evidence and plan teardown before provisioning runtime resources.
 
 Reason: The Azure for Students credit is limited. The £10 monthly budget and actual-cost alerts provide guardrails, while deleting project resources after evidence collection limits unnecessary ongoing spend. This remains a cloud deployment MVP, not an enterprise production deployment.
+
+## 2026-08-12: Retrieve a pinned deployment artifact and verify it before use
+
+Decision: Keep `model_pipeline.joblib` outside Git and define its provenance in `deployment/model_artifact.json`. Future clean deployment builds must retrieve the pinned GitHub Release asset and verify its authoritative SHA-256 checksum before installing or loading it. Deployment builds must never load an unverified joblib/pickle artifact.
+
+Reason: Separating the validated deployment artifact from source code preserves the existing generated-artifact policy and avoids coupling deployment to retraining or access to the Git-ignored raw dataset. Pinning scikit-learn and joblib to the validated runtime versions reduces serialization compatibility risk. The planned `model-v1.0.0` release has not yet been published.
