@@ -1,0 +1,219 @@
+name: Azure Manual Deployment
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      ACR_NAME: acrmlopschurnkl5685752
+      ACR_LOGIN_SERVER: acrmlopschurnkl5685752-ddhkccgxcecpfjb6.azurecr.io
+      IMAGE_NAME: mlops-churn-api
+      RESOURCE_GROUP: rg-mlops-churn-portfolio
+      CONTAINER_APP: ca-mlops-churn-api
+      AZURE_CORE_OUTPUT: none
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Run tests
+        run: python -m pytest
+
+      - name: Retrieve and verify model artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m scripts.fetch_model_artifact
+
+          if [[ ! -f artifacts/model_pipeline.joblib ]]; then
+            echo "::error::Verified model artifact was not installed at artifacts/model_pipeline.joblib."
+            exit 1
+          fi
+
+          echo "Verified model artifact is present for the Docker build."
+
+      - name: Create immutable image reference
+        shell: bash
+        run: |
+          set -euo pipefail
+          short_sha="${GITHUB_SHA::12}"
+          image_ref="${ACR_LOGIN_SERVER}/${IMAGE_NAME}:${short_sha}"
+
+          echo "SHORT_SHA=${short_sha}" >> "$GITHUB_ENV"
+          echo "IMAGE_REF=${image_ref}" >> "$GITHUB_ENV"
+          echo "Image tag: ${short_sha}"
+          echo "Image reference: ${image_ref}"
+
+      - name: Build Docker image
+        run: docker build --tag "$IMAGE_REF" .
+
+      - name: Log in to Azure with OIDC
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Acquire temporary ACR token
+        id: acr-token
+        shell: bash
+        run: |
+          set -euo pipefail
+          acr_token="$(
+            az acr login \
+              --name "$ACR_NAME" \
+              --expose-token \
+              --query accessToken \
+              --output tsv
+          )"
+
+          if [[ -z "$acr_token" ]]; then
+            echo "::error::Azure CLI returned an empty temporary ACR token."
+            exit 1
+          fi
+
+          echo "::add-mask::$acr_token"
+          printf 'token=%s\n' "$acr_token" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to Azure Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.ACR_LOGIN_SERVER }}
+          username: 00000000-0000-0000-0000-000000000000
+          password: ${{ steps.acr-token.outputs.token }}
+
+      - name: Push immutable image
+        run: docker push "$IMAGE_REF"
+
+      - name: Record current deployed image
+        shell: bash
+        run: |
+          set -euo pipefail
+          previous_image="$(
+            az containerapp show \
+              --name "$CONTAINER_APP" \
+              --resource-group "$RESOURCE_GROUP" \
+              --query 'properties.template.containers[0].image' \
+              --output tsv
+          )"
+
+          if [[ -z "$previous_image" ]]; then
+            echo "::error::Could not resolve the currently deployed Container App image."
+            exit 1
+          fi
+
+          echo "Previous deployed image: ${previous_image}"
+
+      - name: Update Container App image
+        run: |
+          az containerapp update \
+            --name "$CONTAINER_APP" \
+            --resource-group "$RESOURCE_GROUP" \
+            --image "$IMAGE_REF" \
+            --output none
+
+      - name: Verify deployed image
+        shell: bash
+        run: |
+          set -euo pipefail
+          deployed_image="$(
+            az containerapp show \
+              --name "$CONTAINER_APP" \
+              --resource-group "$RESOURCE_GROUP" \
+              --query 'properties.template.containers[0].image' \
+              --output tsv
+          )"
+
+          echo "New deployed image: ${deployed_image}"
+          if [[ "$deployed_image" != "$IMAGE_REF" ]]; then
+            echo "::error::Configured image does not match the image pushed by this workflow."
+            exit 1
+          fi
+
+      - name: Resolve health endpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          fqdn="$(
+            az containerapp show \
+              --name "$CONTAINER_APP" \
+              --resource-group "$RESOURCE_GROUP" \
+              --query 'properties.configuration.ingress.fqdn' \
+              --output tsv
+          )"
+
+          if [[ -z "$fqdn" ]]; then
+            echo "::error::Could not resolve the Container App ingress FQDN."
+            exit 1
+          fi
+
+          health_url="https://${fqdn}/health"
+          echo "HEALTH_URL=${health_url}" >> "$GITHUB_ENV"
+          echo "Health endpoint: ${health_url}"
+
+      - name: Run post-deployment health smoke test
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import sys
+          import time
+          import urllib.request
+
+          health_url = os.environ["HEALTH_URL"]
+          max_attempts = 12
+          retry_delay_seconds = 10
+
+          for attempt in range(1, max_attempts + 1):
+              try:
+                  with urllib.request.urlopen(health_url, timeout=15) as response:
+                      status_code = response.status
+                      payload = json.load(response)
+
+                  valid_contract = isinstance(payload, dict) and (
+                      200 <= status_code < 300
+                      and payload.get("status") == "ok"
+                      and payload.get("model_artifact_exists") is True
+                  )
+                  if valid_contract:
+                      print(
+                          f"Health check passed on attempt {attempt}: "
+                          "status=ok, model_artifact_exists=true"
+                      )
+                      break
+
+                  if isinstance(payload, dict):
+                      failure = (
+                          f"HTTP {status_code} with status={payload.get('status')!r} "
+                          "and model_artifact_exists="
+                          f"{payload.get('model_artifact_exists')!r}"
+                      )
+                  else:
+                      failure = f"HTTP {status_code} with a non-object JSON response"
+              except (OSError, ValueError) as exc:
+                  failure = f"{type(exc).__name__}: {exc}"
+
+              print(f"Health attempt {attempt}/{max_attempts} not ready: {failure}")
+              if attempt < max_attempts:
+                  time.sleep(retry_delay_seconds)
+          else:
+              print("Health smoke test failed after the bounded retry limit.", file=sys.stderr)
+              raise SystemExit(1)
+          PY
