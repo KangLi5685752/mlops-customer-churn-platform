@@ -176,7 +176,7 @@ The training script generates `artifacts/model_pipeline.joblib` locally. This ar
 
 The deployment manifest at `deployment/model_artifact.json` records the validated artifact provenance, expected runtime path and authoritative SHA-256 checksum. The model artifact remains outside Git so generated binary deployment output is kept separate from source code.
 
-The first release tag, `model-v1.0.0`, is planned and has not yet been published. Once that release asset exists, a clean build runner will use `python -m scripts.fetch_model_artifact` to download the pinned asset to a temporary file, verify its SHA-256 checksum and only then install it at `artifacts/model_pipeline.joblib`. Deployment builds must never load an unverified joblib/pickle artifact.
+The `model-v1.0.0` release has been published with the `model_pipeline.joblib` asset. GitHub reports the same SHA-256 as the authoritative manifest value. A clean build runner will use `python -m scripts.fetch_model_artifact` to download the pinned asset to a temporary file, verify its SHA-256 checksum and only then install it at `artifacts/model_pipeline.joblib`. Real clean-runner/network retrieval is the next validation step and has not yet been completed. Deployment builds must never load an unverified joblib/pickle artifact. No Azure runtime or workload resources were provisioned by publishing this release.
 
 Runtime compatibility for this validated artifact is protected by pinning `scikit-learn==1.7.2` and `joblib==1.5.3`. The raw training dataset and model artifact both remain excluded from Git.
 

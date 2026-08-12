@@ -74,7 +74,7 @@ Deployment permissions should be scoped as narrowly as practical to `rg-mlops-ch
 
 ## Cloud Build Artifact Guardrail
 
-The validated `model_pipeline.joblib` remains outside Git. Its provenance, runtime compatibility and authoritative SHA-256 checksum are recorded in `deployment/model_artifact.json`. The planned `model-v1.0.0` GitHub Release has not yet been published.
+The validated `model_pipeline.joblib` remains outside Git. Its provenance, runtime compatibility and authoritative SHA-256 checksum are recorded in `deployment/model_artifact.json`. The `model-v1.0.0` GitHub Release has been published with the `model_pipeline.joblib` asset, and GitHub reports the same SHA-256 as the manifest. Real clean-runner/network retrieval is the next validation step and has not yet been completed. No Azure runtime or workload resources were provisioned by publishing the release.
 
 Before any future Docker build on a clean runner, the pinned release asset must be downloaded to a temporary file and verified against the manifest checksum. It may only be installed at `artifacts/model_pipeline.joblib` after verification succeeds. Deployment builds must never load an unverified joblib/pickle artifact. This foundation does not provision Azure runtime resources or add deployment automation.
 
@@ -95,7 +95,7 @@ Stage 11.0 does not implement or add:
 
 1. Stage 11.0: record Azure scope, names, security decisions, cost controls and teardown requirements.
 2. Define and validate the versioned deployment artifact manifest and checksum-gated retrieval process before provisioning runtime resources.
-3. Publish the validated artifact separately only after explicit approval and verify retrieval on a clean runner.
+3. Validate real clean-runner retrieval of the published artifact and verify its SHA-256 before installation.
 4. Validate the Azure subscription context, UK South service availability, required providers and global availability of the planned ACR name.
 5. Create only the approved ACR, Log Analytics and Container Apps resources within `rg-mlops-churn-portfolio` using cost-conscious settings.
 6. Build and publish the existing API image without committing the raw dataset or local model artifacts to Git.

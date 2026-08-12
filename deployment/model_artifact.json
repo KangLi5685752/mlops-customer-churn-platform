@@ -4,7 +4,7 @@
   "artifact_name": "model_pipeline.joblib",
   "runtime_path": "artifacts/model_pipeline.joblib",
   "planned_release_tag": "model-v1.0.0",
-  "release_status": "planned",
+  "release_status": "published",
   "artifact_size_bytes": 8458,
   "artifact_sha256": "D3BDB53DDA77CFE11F2DD18600BA82DE470A10CFD47D60569B42CA839CBF2987",
   "training_source_commit": "be9ea0e60c3ad8816e69939e0e5ac0a7bd08dc7d",
@@ -30,5 +30,5 @@
   "training_metrics_report": "reports/training_metrics.json",
   "model_card": "reports/model_card.md",
   "intended_use": "Local portfolio MLOps prototype for estimating customer churn risk as decision support; it must not automatically determine customer treatment.",
-  "provenance_note": "The raw dataset is not stored in Git, and the model artifact is not stored in Git. This manifest's artifact_sha256 is the authoritative integrity value for the planned deployment artifact. Joblib/pickle artifacts must only be loaded after their provenance and integrity have been verified. The model-v1.0.0 release is planned and has not yet been published."
+  "provenance_note": "The raw dataset is not stored in Git, and the model artifact is not stored in Git. This manifest's artifact_sha256 is the authoritative integrity value for the deployment artifact. Joblib/pickle artifacts must only be loaded after their provenance and integrity have been verified. The model-v1.0.0 release has been published with the model_pipeline.joblib asset, and GitHub reports the same SHA-256 as this manifest. Real clean-runner/network retrieval has not yet been validated."
 }

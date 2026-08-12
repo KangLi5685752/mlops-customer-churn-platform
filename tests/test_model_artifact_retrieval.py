@@ -24,7 +24,7 @@ def test_load_manifest_reads_expected_deployment_metadata() -> None:
     assert manifest["artifact_name"] == "model_pipeline.joblib"
     assert manifest["runtime_path"] == "artifacts/model_pipeline.joblib"
     assert manifest["planned_release_tag"] == "model-v1.0.0"
-    assert manifest["release_status"] == "planned"
+    assert manifest["release_status"] == "published"
 
 
 def test_construct_release_url_uses_planned_tag_and_asset_name() -> None:

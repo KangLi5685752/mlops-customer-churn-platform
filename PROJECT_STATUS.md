@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Stage 11.1B-2 deployment artifact manifest and retrieval/verification foundation completed locally.
+Stage 11.1B-4 validated model artifact release published and documentation synchronised.
 
 ## Completed in This Step
 
@@ -11,8 +11,10 @@ Stage 11.1B-2 deployment artifact manifest and retrieval/verification foundation
 - The retrieval path downloads to a temporary file and installs the artifact only after SHA-256 verification.
 - Pinned scikit-learn 1.7.2 and joblib 1.5.3 for compatibility with the validated deployment artifact.
 - Added offline tests for manifest loading, release URL construction, checksum verification and mismatch rejection.
-- Recorded `model-v1.0.0` as planned but not yet published.
-- No GitHub Release, Azure runtime resource or deployment workflow has been created by this step.
+- Recorded the published `model-v1.0.0` release and its `model_pipeline.joblib` asset.
+- Confirmed that GitHub reports the same SHA-256 as the authoritative deployment manifest.
+- Real clean-runner/network retrieval remains to be validated.
+- No Azure runtime or workload resource or deployment workflow has been created by this release step.
 
 ## Previous Stage 11.0 Completion
 
@@ -172,7 +174,7 @@ Stage 11.1B-2 deployment artifact manifest and retrieval/verification foundation
 
 ## Next Planned Task
 
-Stage 11.1B-3: in a separately authorised step, publish the validated `model_pipeline.joblib` as the `model-v1.0.0` GitHub Release asset and validate clean-runner retrieval before adding Azure deployment automation.
+Stage 11.1B-5: validate real retrieval of the published `model-v1.0.0` asset from GitHub, verify SHA-256 before installation, then rebuild and smoke-test the container from the remotely retrieved artifact.
 
 ## Known Risks
 
@@ -185,7 +187,7 @@ Stage 11.1B-3: in a separately authorised step, publish the validated `model_pip
 
 ## Current Status Summary
 
-The local MLOps workflow is complete. Stage 11.1B-2 now defines a versioned deployment artifact manifest and checksum-gated retrieval foundation for future clean builds. The `model-v1.0.0` release is planned but not published. The resource group `rg-mlops-churn-portfolio` exists in UK South, but no cloud runtime or workload resources such as ACR, Container Apps, Log Analytics or the deployment identity have been provisioned yet.
+The local MLOps workflow is complete. The `model-v1.0.0` release has been published with the `model_pipeline.joblib` asset, and GitHub reports the same SHA-256 as the authoritative deployment manifest. Real clean-runner/network retrieval has not yet been validated. The resource group `rg-mlops-churn-portfolio` exists in UK South, but no cloud runtime or workload resources such as ACR, Container Apps, Log Analytics or the deployment identity have been provisioned yet.
 
 ## Project Evidence and Validation Artifacts to Collect
 
@@ -222,4 +224,5 @@ The local MLOps workflow is complete. Stage 11.1B-2 now defines a versioned depl
 - 2026-07-08: Finalised model card and risk register for Stage 10A.
 - 2026-07-11: Added local synthetic API latency benchmarking evidence for Stage 10B.
 - 2026-08-12: Documented Azure deployment guardrails and teardown planning for Stage 11.0 after creating `rg-mlops-churn-portfolio` in UK South; no cloud runtime or workload resources were provisioned.
-- 2026-08-12: Added the Stage 11.1B-2 deployment artifact manifest, compatibility pins and offline checksum-verification foundation; the planned model release was not published.
+- 2026-08-12: Added the Stage 11.1B-2 deployment artifact manifest, compatibility pins and offline checksum-verification foundation.
+- 2026-08-12: Published the validated `model_pipeline.joblib` asset in the `model-v1.0.0` release; GitHub reported the manifest-matching SHA-256, while real remote retrieval remains pending.
