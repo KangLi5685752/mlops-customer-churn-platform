@@ -2,9 +2,9 @@
 
 ## Short Overview
 
-This project turns a notebook-based customer churn prediction baseline into a reproducible, testable, containerised and monitored ML service prototype. It is designed as a portfolio-grade MLOps project that shows how an experimentation-stage machine learning workflow can be moved toward production-style engineering practices.
+This project turns a notebook-based customer churn prediction baseline into a reproducible, testable, containerised and monitored ML service prototype. It is designed as a portfolio-grade MLOps project that shows how an experimentation-stage machine learning workflow can be moved toward production-style engineering practices and a small cloud-hosted portfolio deployment.
 
-The project is a local prototype, not a real production deployment. It will avoid claims of real business impact, real company deployment or real customer retention improvement.
+The project includes manually validated Azure hosting for portfolio evidence. It is not a production deployment and does not claim production traffic, a production SLA, real business impact, real company deployment or real customer retention improvement.
 
 ## Project Architecture
 
@@ -20,7 +20,7 @@ Raw Telco CSV
 -> Streamlit dashboard
 ```
 
-MLflow records local training experiment metadata under `mlruns/`. GitHub Actions runs the pytest suite automatically on push and pull request. Docker packages the local FastAPI API service using the locally generated model artifact. This is a local MLOps prototype, not a production deployment.
+MLflow records local training experiment metadata under `mlruns/`. GitHub Actions runs the pytest suite automatically on push and pull request. Docker packages the FastAPI API service using the validated model artifact. The same image has been manually validated through Azure Container Registry and Azure Container Apps as a cloud-hosted portfolio deployment, not a production deployment.
 
 ## Reproducibility Workflow
 
@@ -419,6 +419,25 @@ http://127.0.0.1:8000/docs
 
 The Docker image uses the locally generated `artifacts/model_pipeline.joblib`. The raw dataset is not copied into the image. The Dockerfile does not train the model. This is a local containerised API prototype, not a cloud deployment.
 
+## Azure Deployment Evidence
+
+Stages 11.2 through 11.4 manually validated the existing container image on Azure. Azure workload resources use Sweden Central because the Azure for Students subscription region policy prevented deployment in the originally intended UK South region.
+
+- Azure Container Registry: `acrmlopschurnkl5685752`, Basic SKU.
+- Image: `mlops-churn-api:fcd471855395`.
+- Registry manifest digest: `sha256:db8466a6f629f6fbb3cd270b2b917fd00b7c77d18a8df56d455c5ff634100dde`.
+- Container Apps environment: `cae-mlops-churn`.
+- Container App: `ca-mlops-churn-api`, Consumption workload profile, `0.5 vCPU / 1 GiB`.
+- Ingress: external HTTPS to container port 8000.
+- Registry authentication: managed identity.
+- Log Analytics workspace: `log-mlops-churn`.
+
+Azure-hosted API validation confirmed `GET /health` returned `status: ok` with `model_artifact_exists: true`, `GET /docs` returned HTTP 200, and a synthetic `POST /predict` returned churn probability `0.660990846586016`, prediction `1` and risk label `high`. The cloud prediction matched the previously validated local Docker result for the same synthetic payload.
+
+Live and persistent logs confirmed image pull, container lifecycle, Uvicorn startup and successful health, prediction and docs requests. Persistent queries were validated with `ContainerAppConsoleLogs_CL` and `ContainerAppSystemLogs_CL`. A startup probe warning was followed by successful startup and endpoint responses, so it was not an outage. The Consumption app was observed scaling its replica down after inactivity; this observation does not establish stronger cost or availability guarantees.
+
+This is manual Azure deployment validation for a cloud-hosted portfolio deployment. It is not production traffic, a production SLA or a real customer workload. GitHub Actions deployment with Azure OIDC is planned for Stage 11.5 and has not yet been implemented.
+
 ## Implemented MLOps Components
 
 The planned MLOps components are:
@@ -503,7 +522,7 @@ Additional local evidence to capture manually:
 
 The MVP will not include:
 
-- real cloud deployment
+- production deployment or production traffic
 - Kubernetes
 - complex database architecture
 - real-time streaming infrastructure
@@ -513,9 +532,9 @@ The MVP will not include:
 
 ## Limitations and Responsible Use Notes
 
-The Telco Customer Churn dataset is small and public, so results from this project should not be treated as evidence of real production performance. The project does not use real customer data, real production traffic or cloud infrastructure.
+The Telco Customer Churn dataset is small and public, so results from this project should not be treated as evidence of real production performance. The project does not use real customer data, real production traffic or a real customer workload. Azure hosting was manually validated only as a cost-controlled portfolio deployment.
 
-There is no real production deployment, live production monitoring, validated business retention policy or automated customer treatment workflow. Model predictions should support human review rather than automatically decide customer treatment. False positives and false negatives have different business implications. For example, a false positive could lead to unnecessary retention action, while a false negative could miss a customer who may churn.
+This is not a production deployment and does not provide live production monitoring, a validated business retention policy or an automated customer treatment workflow. Model predictions should support human review rather than automatically decide customer treatment. False positives and false negatives have different business implications. For example, a false positive could lead to unnecessary retention action, while a false negative could miss a customer who may churn.
 
 Prediction traffic is synthetic local sample traffic. Drift detection is simulated, uses simple demonstration thresholds and does not use ground-truth labels. The Streamlit dashboard is a local prototype for portfolio evidence, not production observability or live alerting.
 

@@ -2,9 +2,36 @@
 
 ## Current Phase
 
-Stage 11.1B-4 validated model artifact release published and documentation synchronised.
+Stage 11.4 Azure observability validation completed manually.
 
-## Completed in This Step
+## Stage 11.2 Completion
+
+- Created the Basic Azure Container Registry `acrmlopschurnkl5685752` in Sweden Central.
+- Manually pushed the locally validated image to repository `mlops-churn-api` with tag `fcd471855395`.
+- Verified the image through Azure CLI repository, tag and digest queries.
+- Recorded registry manifest digest `sha256:db8466a6f629f6fbb3cd270b2b917fd00b7c77d18a8df56d455c5ff634100dde`.
+
+## Stage 11.3 Completion
+
+- Created Container Apps environment `cae-mlops-churn` and Container App `ca-mlops-churn-api` in Sweden Central.
+- Used the Consumption workload profile with `0.5 vCPU / 1 GiB`, external HTTPS ingress and target port 8000.
+- Configured managed identity for registry authentication.
+- Confirmed the cloud-hosted portfolio API reached Running state.
+- Validated `GET /health`, including `status: ok` and `model_artifact_exists: true`.
+- Validated `POST /predict` with a synthetic request; the cloud result matched the previously validated local Docker prediction.
+- Confirmed `GET /docs` returned HTTP 200.
+
+## Stage 11.4 Completion
+
+- Validated live Azure Container Apps system logs for image pull, container creation and container startup.
+- Validated live console logs for Uvicorn startup and successful `/health`, `/predict` and `/docs` requests.
+- Validated persistent Log Analytics queries using `ContainerAppConsoleLogs_CL` and `ContainerAppSystemLogs_CL` in `log-mlops-churn`.
+- Observed a startup probe warning followed by successful startup and endpoint requests; it was not treated as an outage.
+- Observed the Consumption app scale its replica down after inactivity without making stronger cost or availability claims.
+- These stages are manual deployment validation for a cloud-hosted portfolio deployment, not production traffic or a production SLA.
+- This documentation sync created no Azure resources, OIDC configuration, deployment workflow, alert, dashboard or Application Insights resource.
+
+## Previous Stage 11.1 Completion
 
 - Added a machine-readable deployment artifact manifest with validated provenance, metrics, compatibility versions and authoritative SHA-256 checksum.
 - Added a standard-library retrieval script for a future pinned GitHub Release asset.
@@ -13,8 +40,8 @@ Stage 11.1B-4 validated model artifact release published and documentation synch
 - Added offline tests for manifest loading, release URL construction, checksum verification and mismatch rejection.
 - Recorded the published `model-v1.0.0` release and its `model_pipeline.joblib` asset.
 - Confirmed that GitHub reports the same SHA-256 as the authoritative deployment manifest.
-- Real clean-runner/network retrieval remains to be validated.
-- No Azure runtime or workload resource or deployment workflow has been created by this release step.
+- Real clean-runner/network retrieval was identified as the next artifact validation step at that stage.
+- No Azure runtime or workload resource or deployment workflow was created by the model release step.
 
 ## Previous Stage 11.0 Completion
 
@@ -174,7 +201,7 @@ Stage 11.1B-4 validated model artifact release published and documentation synch
 
 ## Next Planned Task
 
-Stage 11.1B-5: validate real retrieval of the published `model-v1.0.0` asset from GitHub, verify SHA-256 before installation, then rebuild and smoke-test the container from the remotely retrieved artifact.
+Stage 11.5: add GitHub Actions CI/CD using Azure OIDC/federated identity, while preventing pull request workflows from deploying and keeping permissions scoped as narrowly as practical.
 
 ## Known Risks
 
@@ -187,7 +214,7 @@ Stage 11.1B-5: validate real retrieval of the published `model-v1.0.0` asset fro
 
 ## Current Status Summary
 
-The local MLOps workflow is complete. The `model-v1.0.0` release has been published with the `model_pipeline.joblib` asset, and GitHub reports the same SHA-256 as the authoritative deployment manifest. Real clean-runner/network retrieval has not yet been validated. The resource group `rg-mlops-churn-portfolio` exists in UK South, but no cloud runtime or workload resources such as ACR, Container Apps, Log Analytics or the deployment identity have been provisioned yet.
+The local MLOps workflow is complete. Stages 11.2 through 11.4 manually validated the Azure Container Registry image, the cloud-hosted portfolio API on Azure Container Apps and persistent Container Apps logs in Log Analytics. The workload resources use Sweden Central because the Azure for Students subscription region policy prevented the originally intended UK South deployment. GitHub Actions deployment with OIDC has not yet been added; Stage 11.5 remains the next task.
 
 ## Project Evidence and Validation Artifacts to Collect
 
@@ -203,6 +230,9 @@ The local MLOps workflow is complete. The `model-v1.0.0` release has been publis
 - Simulated drift detection output.
 - Streamlit monitoring dashboard screenshot.
 - Final model card and risk register content.
+- Azure Container Registry repository, tag and digest evidence.
+- Azure-hosted `/health`, synthetic `/predict` and `/docs` validation evidence.
+- Azure Container Apps live and persistent Log Analytics query evidence.
 
 ## Milestone Log
 
@@ -226,3 +256,6 @@ The local MLOps workflow is complete. The `model-v1.0.0` release has been publis
 - 2026-08-12: Documented Azure deployment guardrails and teardown planning for Stage 11.0 after creating `rg-mlops-churn-portfolio` in UK South; no cloud runtime or workload resources were provisioned.
 - 2026-08-12: Added the Stage 11.1B-2 deployment artifact manifest, compatibility pins and offline checksum-verification foundation.
 - 2026-08-12: Published the validated `model_pipeline.joblib` asset in the `model-v1.0.0` release; GitHub reported the manifest-matching SHA-256, while real remote retrieval remains pending.
+- 2026-08-13: Completed Stage 11.2 manual ACR image push and digest validation in Sweden Central.
+- 2026-08-13: Completed Stage 11.3 manual Azure Container Apps deployment and synthetic endpoint validation.
+- 2026-08-13: Completed Stage 11.4 live and persistent Azure Container Apps log validation through Log Analytics.

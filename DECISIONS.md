@@ -197,3 +197,9 @@ Reason: The Azure for Students credit is limited. The £10 monthly budget and ac
 Decision: Keep `model_pipeline.joblib` outside Git and define its provenance in `deployment/model_artifact.json`. Future clean deployment builds must retrieve the pinned GitHub Release asset and verify its authoritative SHA-256 checksum before installing or loading it. Deployment builds must never load an unverified joblib/pickle artifact.
 
 Reason: Separating the validated deployment artifact from source code preserves the existing generated-artifact policy and avoids coupling deployment to retraining or access to the Git-ignored raw dataset. Pinning scikit-learn and joblib to the validated runtime versions reduces serialization compatibility risk. The `model-v1.0.0` release has now been published with the `model_pipeline.joblib` asset, and GitHub reports the same SHA-256 as the manifest. Real clean-runner/network retrieval remains to be validated, and no Azure runtime or workload resources were provisioned by the release step.
+
+## 2026-08-13: Use Sweden Central for Azure workload resources
+
+Decision: Deploy the Stage 11 Azure Container Registry and Container Apps workload resources in Sweden Central instead of the originally intended UK South region.
+
+Reason: The Azure for Students subscription region policy prevented the intended UK South workload deployment. Sweden Central supported the required services and was used for the manually validated cloud-hosted portfolio deployment. This is a subscription-policy adjustment, not an expansion of infrastructure scope.
