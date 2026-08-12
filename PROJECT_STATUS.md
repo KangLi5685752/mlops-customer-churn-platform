@@ -2,7 +2,28 @@
 
 ## Current Phase
 
-Stage 11.4 Azure observability validation completed manually.
+Stage 11.5E manual end-to-end GitHub Actions deployment validated successfully.
+
+## Stage 11.5 Status
+
+- Stage 11.5A: user-assigned managed identity `id-github-mlops-churn` completed.
+- Stage 11.5B: GitHub-to-Azure OIDC federation restricted to this repository's `main` branch completed.
+- Stage 11.5C: resource-scoped Azure RBAC completed with narrowly scoped registry and Container Apps permissions.
+- Stage 11.5D: real OIDC login and Azure read-access smoke test completed.
+- Stage 11.5E: manual end-to-end deployment through `.github/workflows/azure-deploy.yml` validated successfully.
+- Stage 11.5 remains open until automatic deployment from `main` is enabled and validated.
+
+## Stage 11.5E Validation
+
+- Manually dispatched the deployment workflow from `main` at source commit `b613f29250c3b4c14b54a4c5a7a7a39579effaca`.
+- Ran 34 tests successfully on the GitHub-hosted runner.
+- Retrieved `model_pipeline.joblib` from the pinned GitHub Release and verified its authoritative SHA-256 before Docker build; the workflow did not train the model.
+- Built and pushed only immutable image `acrmlopschurnkl5685752-ddhkccgxcecpfjb6.azurecr.io/mlops-churn-api:b613f29250c3`.
+- Recorded pushed digest `sha256:10d9aab1516f80e0c54edd05cb6410efb7d8a7a341c85ee7270b97f3aaa1805a`.
+- Updated the existing Container App from image tag `fcd471855395` to `b613f29250c3`, then independently queried Azure and confirmed the configured image matched.
+- Used OIDC federated authentication without long-lived Azure client secrets and a temporary masked ACR token without enabling the ACR admin account.
+- The bounded post-deployment `/health` check accommodated revision startup and passed on attempt 2 with `status: ok` and `model_artifact_exists: true`; the first timeout was not treated as an outage.
+- The workflow remains `workflow_dispatch` only. Automatic deployment from `main` is not yet implemented.
 
 ## Stage 11.2 Completion
 
@@ -201,7 +222,7 @@ Stage 11.4 Azure observability validation completed manually.
 
 ## Next Planned Task
 
-Stage 11.5: add GitHub Actions CI/CD using Azure OIDC/federated identity, while preventing pull request workflows from deploying and keeping permissions scoped as narrowly as practical.
+Enable and validate automatic deployment from `main` using the already validated deployment workflow. Pull request workflows must remain non-deploying.
 
 ## Known Risks
 
@@ -211,10 +232,12 @@ Stage 11.5: add GitHub Actions CI/CD using Azure OIDC/federated identity, while 
 - Drift monitoring in this portfolio project will be simulated rather than based on live production data.
 - Scope could expand too quickly if cloud deployment, Kubernetes or streaming systems are added too early.
 - Baseline metrics may change if the dataset version or preprocessing assumptions change.
+- The deployment workflow currently requires manual dispatch; automatic deployment from `main` has not yet been validated.
+- A non-blocking Azure CLI version-parsing warning was observed in the successful run and did not prevent login, image push, deployment verification or health validation.
 
 ## Current Status Summary
 
-The local MLOps workflow is complete. Stages 11.2 through 11.4 manually validated the Azure Container Registry image, the cloud-hosted portfolio API on Azure Container Apps and persistent Container Apps logs in Log Analytics. The workload resources use Sweden Central because the Azure for Students subscription region policy prevented the originally intended UK South deployment. GitHub Actions deployment with OIDC has not yet been added; Stage 11.5 remains the next task.
+The local MLOps workflow is complete. Stages 11.2 through 11.4 validated ACR, the cloud-hosted portfolio API and Log Analytics evidence. Stage 11.5 has now validated GitHub OIDC federation without long-lived Azure client secrets, resource-scoped RBAC and a manually dispatched end-to-end deployment using an immutable Git-SHA image. Stage 11.5 remains open because automatic deployment from `main` has not yet been enabled or validated.
 
 ## Project Evidence and Validation Artifacts to Collect
 
@@ -233,6 +256,8 @@ The local MLOps workflow is complete. Stages 11.2 through 11.4 manually validate
 - Azure Container Registry repository, tag and digest evidence.
 - Azure-hosted `/health`, synthetic `/predict` and `/docs` validation evidence.
 - Azure Container Apps live and persistent Log Analytics query evidence.
+- GitHub Actions OIDC smoke-test evidence.
+- Manual deployment run evidence for artifact verification, immutable image push, deployed-image confirmation and the successful bounded `/health` check.
 
 ## Milestone Log
 
@@ -259,3 +284,5 @@ The local MLOps workflow is complete. Stages 11.2 through 11.4 manually validate
 - 2026-08-13: Completed Stage 11.2 manual ACR image push and digest validation in Sweden Central.
 - 2026-08-13: Completed Stage 11.3 manual Azure Container Apps deployment and synthetic endpoint validation.
 - 2026-08-13: Completed Stage 11.4 live and persistent Azure Container Apps log validation through Log Analytics.
+- 2026-08-13: Completed Stage 11.5A through 11.5D identity, federation, resource-scoped RBAC and real OIDC smoke validation.
+- 2026-08-13: Validated the Stage 11.5E manual end-to-end GitHub Actions deployment of immutable image tag `b613f29250c3`, including post-deployment image and health checks.

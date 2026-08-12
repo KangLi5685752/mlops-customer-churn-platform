@@ -176,7 +176,7 @@ The training script generates `artifacts/model_pipeline.joblib` locally. This ar
 
 The deployment manifest at `deployment/model_artifact.json` records the validated artifact provenance, expected runtime path and authoritative SHA-256 checksum. The model artifact remains outside Git so generated binary deployment output is kept separate from source code.
 
-The `model-v1.0.0` release has been published with the `model_pipeline.joblib` asset. GitHub reports the same SHA-256 as the authoritative manifest value. A clean build runner will use `python -m scripts.fetch_model_artifact` to download the pinned asset to a temporary file, verify its SHA-256 checksum and only then install it at `artifacts/model_pipeline.joblib`. Real clean-runner/network retrieval is the next validation step and has not yet been completed. Deployment builds must never load an unverified joblib/pickle artifact. No Azure runtime or workload resources were provisioned by publishing this release.
+The `model-v1.0.0` release has been published with the `model_pipeline.joblib` asset. GitHub reports the same SHA-256 as the authoritative manifest value. A real GitHub-hosted deployment run used `python -m scripts.fetch_model_artifact` to download the pinned asset to a temporary file, verify its SHA-256 checksum and only then install it at `artifacts/model_pipeline.joblib`. Deployment builds must never load an unverified joblib/pickle artifact. Publishing the release itself did not provision Azure runtime or workload resources.
 
 Runtime compatibility for this validated artifact is protected by pinning `scikit-learn==1.7.2` and `joblib==1.5.3`. The raw training dataset and model artifact both remain excluded from Git.
 
@@ -227,6 +227,8 @@ The tests include data cleaning, preprocessing, model-pipeline and FastAPI endpo
 GitHub Actions runs the pytest suite on every push and pull request using Python 3.10.
 
 The CI workflow installs dependencies from `requirements.txt` and runs `python -m pytest`. These tests use synthetic data and mocked API model loading where appropriate, so CI does not require the raw Telco CSV file or a committed `artifacts/model_pipeline.joblib` file.
+
+The separate Azure deployment workflow currently runs only through manual `workflow_dispatch`. It retrieves and verifies the pinned model artifact, runs pytest, builds an immutable Git-SHA-tagged image, authenticates to Azure through OIDC federation without long-lived Azure client secrets, pushes to ACR, updates only the existing Container App image, verifies the configured image and performs a bounded `/health` smoke test. Automatic deployment from `main` has not yet been enabled.
 
 ## Run the FastAPI App
 
@@ -436,7 +438,11 @@ Azure-hosted API validation confirmed `GET /health` returned `status: ok` with `
 
 Live and persistent logs confirmed image pull, container lifecycle, Uvicorn startup and successful health, prediction and docs requests. Persistent queries were validated with `ContainerAppConsoleLogs_CL` and `ContainerAppSystemLogs_CL`. A startup probe warning was followed by successful startup and endpoint responses, so it was not an outage. The Consumption app was observed scaling its replica down after inactivity; this observation does not establish stronger cost or availability guarantees.
 
-This is manual Azure deployment validation for a cloud-hosted portfolio deployment. It is not production traffic, a production SLA or a real customer workload. GitHub Actions deployment with Azure OIDC is planned for Stage 11.5 and has not yet been implemented.
+Stage 11.5 validated GitHub Actions deployment through the federated user-assigned identity `id-github-mlops-churn`. The OIDC trust is restricted to this repository's `main` branch, and no long-lived Azure client secret or ACR admin credential is used. Azure access uses resource-scoped RBAC with narrowly scoped registry and Container Apps permissions.
+
+The first successful manual end-to-end run used source commit `b613f29250c3b4c14b54a4c5a7a7a39579effaca` and pushed immutable image `acrmlopschurnkl5685752-ddhkccgxcecpfjb6.azurecr.io/mlops-churn-api:b613f29250c3` with digest `sha256:10d9aab1516f80e0c54edd05cb6410efb7d8a7a341c85ee7270b97f3aaa1805a`. The workflow downloaded and verified the pinned model artifact before Docker build, passed 34 tests, updated the Container App from tag `fcd471855395`, independently confirmed the new deployed image and passed the `/health` contract on attempt 2 after one startup timeout.
+
+This is validated manual GitHub Actions deployment for a cloud-hosted portfolio deployment. It is not production traffic, a production SLA or a real customer workload. The workflow remains `workflow_dispatch` only; automatic deployment from `main` is the next Stage 11.5 task.
 
 ## Implemented MLOps Components
 
@@ -446,7 +452,7 @@ The planned MLOps components are:
 - Pydantic input validation
 - Docker
 - pytest
-- GitHub Actions CI
+- GitHub Actions pytest CI and manually validated Azure deployment workflow
 - MLflow tracking
 - prediction logging
 - synthetic drift detection
@@ -512,6 +518,10 @@ Additional local evidence to capture manually:
 - FastAPI model serving with Pydantic request validation.
 - Dockerised local API serving.
 - GitHub Actions CI running `python -m pytest`.
+- GitHub Actions deployment using OIDC federation without long-lived Azure client secrets.
+- SHA-256-verified model artifact retrieval before container build.
+- Immutable Git-SHA-tagged ACR images with deployed-image verification and a bounded health smoke test.
+- Resource-scoped Azure RBAC and Azure Log Analytics observability.
 - Local MLflow experiment tracking.
 - Local JSONL prediction logging.
 - Synthetic sample prediction traffic generation.

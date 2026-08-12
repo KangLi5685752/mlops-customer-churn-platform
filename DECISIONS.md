@@ -180,11 +180,11 @@ Decision: Use UK South for Stage 11 resources where the selected Azure service s
 
 Reason: A single selected region keeps resource management, cost review, evidence collection and teardown simpler for the portfolio MVP.
 
-## 2026-08-12: Use GitHub OIDC with least-privilege deployment access
+## 2026-08-12: Use GitHub OIDC with resource-scoped deployment access
 
-Decision: Authenticate future GitHub Actions deployment through OIDC federation using `id-github-mlops-churn`, with permissions scoped as narrowly as practical to `rg-mlops-churn-portfolio`.
+Decision: Authenticate GitHub Actions deployment through OIDC federation using `id-github-mlops-churn`, with the federated subject restricted to this repository's `main` branch and no long-lived Azure client secret.
 
-Reason: OIDC avoids storing long-lived Azure client secrets in GitHub. Pull request workflows must not deploy, and normal CI/CD deployment does not require subscription-wide Owner access.
+Reason: OIDC avoids storing long-lived Azure client secrets in GitHub. The identity uses resource-scoped RBAC with narrowly scoped registry and Container Apps permissions rather than subscription-wide Owner access. Pull request workflows must not deploy.
 
 ## 2026-08-12: Use a cost-controlled, teardown-first cloud MVP
 
@@ -196,10 +196,22 @@ Reason: The Azure for Students credit is limited. The £10 monthly budget and ac
 
 Decision: Keep `model_pipeline.joblib` outside Git and define its provenance in `deployment/model_artifact.json`. Future clean deployment builds must retrieve the pinned GitHub Release asset and verify its authoritative SHA-256 checksum before installing or loading it. Deployment builds must never load an unverified joblib/pickle artifact.
 
-Reason: Separating the validated deployment artifact from source code preserves the existing generated-artifact policy and avoids coupling deployment to retraining or access to the Git-ignored raw dataset. Pinning scikit-learn and joblib to the validated runtime versions reduces serialization compatibility risk. The `model-v1.0.0` release has now been published with the `model_pipeline.joblib` asset, and GitHub reports the same SHA-256 as the manifest. Real clean-runner/network retrieval remains to be validated, and no Azure runtime or workload resources were provisioned by the release step.
+Reason: Separating the validated deployment artifact from source code preserves the existing generated-artifact policy and avoids coupling deployment to retraining or access to the Git-ignored raw dataset. Pinning scikit-learn and joblib to the validated runtime versions reduces serialization compatibility risk. The `model-v1.0.0` release contains the `model_pipeline.joblib` asset, GitHub reports the same SHA-256 as the manifest, and Stage 11.5E validated retrieval and checksum verification on a GitHub-hosted runner before Docker build.
 
 ## 2026-08-13: Use Sweden Central for Azure workload resources
 
 Decision: Deploy the Stage 11 Azure Container Registry and Container Apps workload resources in Sweden Central instead of the originally intended UK South region.
 
 Reason: The Azure for Students subscription region policy prevented the intended UK South workload deployment. Sweden Central supported the required services and was used for the manually validated cloud-hosted portfolio deployment. This is a subscription-policy adjustment, not an expansion of infrastructure scope.
+
+## 2026-08-13: Add narrow ACR configuration read permission
+
+Decision: Grant `Container Registry Configuration Reader and Data Access Configuration Reader` alongside `AcrPush` at the ACR resource scope for `id-github-mlops-churn`.
+
+Reason: A validation run showed that `AcrPush` alone did not allow `az acr login --expose-token` to resolve the registry configuration for the non-default login server. The additional read role corrected that specific requirement without broadening access beyond the ACR resource.
+
+## 2026-08-13: Deploy immutable images with independent verification
+
+Decision: Use the manual-only GitHub Actions deployment workflow to retrieve and verify the pinned model artifact, build and push a Git-SHA-tagged image, update only the existing Container App image, query Azure to confirm the deployed image and validate the `/health` JSON contract with bounded retries.
+
+Reason: The first successful end-to-end run demonstrated artifact integrity verification, immutable image traceability, OIDC federated authentication, temporary ACR authentication and post-deployment checks without training in CI, committing the model artifact, enabling the ACR admin account or adding automatic rollback. Automatic deployment from `main` remains a separate validation step.

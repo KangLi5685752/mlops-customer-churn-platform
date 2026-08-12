@@ -2,7 +2,7 @@
 
 ## Status
 
-This document began as the Stage 11.0 cloud deployment plan and guardrails. It now also records the manually validated Stage 11.2 through 11.4 cloud-hosted portfolio deployment evidence.
+This document began as the Stage 11.0 cloud deployment plan and guardrails. It now also records the validated Stage 11.2 through 11.5E cloud-hosted portfolio deployment evidence.
 
 The Azure resource group `rg-mlops-churn-portfolio` was created with UK South as its resource-group location. The Azure workload resources were deployed in Sweden Central because the Azure for Students subscription region policy prevented the originally intended UK South deployment. The project remains a cost-controlled portfolio cloud deployment MVP, not a production deployment.
 
@@ -40,9 +40,9 @@ UK South was the intended workload region. The Azure for Students subscription r
 | Container Apps Environment | `cae-mlops-churn` | Created in Sweden Central. |
 | Container App | `ca-mlops-churn-api` | Running in Sweden Central on the Consumption workload profile. |
 | Log Analytics Workspace | `log-mlops-churn` | Used for validated persistent Container Apps log queries. |
-| GitHub deployment identity | `id-github-mlops-churn` | Intended federated deployment identity. |
+| GitHub deployment identity | `id-github-mlops-churn` | OIDC federation and manual deployment validated from this repository's `main` branch. |
 
-The workload resource names were validated during manual deployment. The GitHub deployment identity remains planned for Stage 11.5 and has not yet been created or configured by this documentation step.
+The workload resource names were validated during manual deployment. The GitHub deployment identity is configured for OIDC federated authentication without long-lived Azure client secrets.
 
 ## Completed Manual Validation
 
@@ -67,6 +67,20 @@ The workload resource names were validated during manual deployment. The GitHub 
 - Observed a startup probe warning followed by successful startup and requests; this was not an outage.
 - Observed the Consumption replica scale down after inactivity without inferring a production SLA, availability guarantee or specific cost saving.
 
+### Stage 11.5: GitHub Actions OIDC and Manual Deployment
+
+- Stage 11.5A created user-assigned managed identity `id-github-mlops-churn`.
+- Stage 11.5B configured GitHub-to-Azure federation for `KangLi5685752/mlops-customer-churn-platform` on `main`.
+- Stage 11.5C configured resource-scoped RBAC: `AcrPush` plus `Container Registry Configuration Reader and Data Access Configuration Reader` at the ACR resource, and `Container Apps Contributor` at `rg-mlops-churn-portfolio`.
+- The registry configuration reader role was added narrowly after validation showed that `AcrPush` alone did not allow `az acr login --expose-token` to resolve the non-default login server `acrmlopschurnkl5685752-ddhkccgxcecpfjb6.azurecr.io`.
+- Stage 11.5D validated OIDC token issuance, `main`-branch subject binding, Azure CLI federated login and read access to the subscription and existing Container App.
+- Stage 11.5E manually ran `.github/workflows/azure-deploy.yml` from `main` and passed all 34 tests.
+- The workflow retrieved the pinned GitHub Release artifact, verified its SHA-256 and confirmed `artifacts/model_pipeline.joblib` existed before building; it did not train the model or store the artifact in Git.
+- It built and pushed immutable image tag `b613f29250c3` from source commit `b613f29250c3b4c14b54a4c5a7a7a39579effaca`, with digest `sha256:10d9aab1516f80e0c54edd05cb6410efb7d8a7a341c85ee7270b97f3aaa1805a`.
+- It recorded previous tag `fcd471855395`, updated only the Container App image and independently verified that Azure reported the new immutable image reference.
+- The bounded HTTPS `/health` smoke test passed on attempt 2 with `status: ok` and `model_artifact_exists: true`; the first timeout accommodated revision startup and was not an outage.
+- The workflow remains manual-only through `workflow_dispatch`. Automatic deployment from `main` is not yet enabled or validated.
+
 ## Cost Guardrails
 
 - Use the existing billing budget `budget-mlops-portfolio`.
@@ -79,11 +93,11 @@ The workload resource names were validated during manual deployment. The GitHub 
 
 A budget and alerts help detect spend but do not automatically stop or delete Azure resources.
 
-## Deployment Identity and Least Privilege
+## Deployment Identity and Resource-Scoped RBAC
 
-GitHub Actions deployment must use OIDC federation rather than a long-lived Azure client secret or password. Pull request workflows must never deploy Azure resources.
+GitHub Actions deployment uses OIDC federation rather than a long-lived Azure client secret or password. The federated subject is restricted to this repository's `main` branch. Pull request workflows must never deploy Azure resources.
 
-Deployment permissions should be scoped as narrowly as practical to `rg-mlops-churn-portfolio` and to the actions required by the selected deployment process. Subscription-wide Owner access must not be granted for normal CI/CD deployment. Role assignments should be reviewed before use and removed during teardown when they are no longer required.
+The deployment identity uses resource-scoped RBAC with narrowly scoped registry and Container Apps permissions. It has `AcrPush` and `Container Registry Configuration Reader and Data Access Configuration Reader` at the ACR resource, plus `Container Apps Contributor` at the project resource group. It does not use subscription-wide Owner access for deployment. Role assignments should be reviewed and removed during teardown when no longer required.
 
 ## Secret-Handling Policy
 
@@ -97,15 +111,15 @@ Deployment permissions should be scoped as narrowly as practical to `rg-mlops-ch
 
 ## Cloud Build Artifact Guardrail
 
-The validated `model_pipeline.joblib` remains outside Git. Its provenance, runtime compatibility and authoritative SHA-256 checksum are recorded in `deployment/model_artifact.json`. The `model-v1.0.0` GitHub Release has been published with the `model_pipeline.joblib` asset, and GitHub reports the same SHA-256 as the manifest. Real clean-runner/network retrieval is the next validation step and has not yet been completed. No Azure runtime or workload resources were provisioned by publishing the release.
+The validated `model_pipeline.joblib` remains outside Git. Its provenance, runtime compatibility and authoritative SHA-256 checksum are recorded in `deployment/model_artifact.json`. The `model-v1.0.0` GitHub Release has been published with the `model_pipeline.joblib` asset, and GitHub reports the same SHA-256 as the manifest. A real GitHub-hosted deployment run successfully retrieved and verified the artifact before Docker build.
 
-Before any future Docker build on a clean runner, the pinned release asset must be downloaded to a temporary file and verified against the manifest checksum. It may only be installed at `artifacts/model_pipeline.joblib` after verification succeeds. Deployment builds must never load an unverified joblib/pickle artifact. This foundation does not provision Azure runtime resources or add deployment automation.
+Before every Docker build on a clean runner, the pinned release asset must be downloaded to a temporary file and verified against the manifest checksum. It may only be installed at `artifacts/model_pipeline.joblib` after verification succeeds. Deployment builds must never load an unverified joblib/pickle artifact.
 
 ## Explicitly Out of Scope
 
 The Stage 11 cloud MVP does not include:
 
-- GitHub Actions deployment workflows before Stage 11.5;
+- automatic deployment from `main` until it is separately enabled and validated;
 - changes to the Docker application or model workflow;
 - Terraform or Bicep;
 - Kubernetes or AKS;
@@ -120,6 +134,7 @@ The Stage 11 cloud MVP does not include:
 3. Completed manually: built and pushed the validated image to ACR and verified its tag and digest in Stage 11.2.
 4. Completed manually: deployed the Container App and validated `/health`, `/docs` and `/predict` with a synthetic request in Stage 11.3.
 5. Completed manually: validated live and persistent Container Apps logs through Log Analytics in Stage 11.4.
-6. Next: configure GitHub OIDC federation and narrowly scoped deployment permissions in Stage 11.5.
-7. Next: add a deployment workflow that cannot deploy from pull request events and validate the intended CI/CD path.
-8. Later: collect final portfolio evidence and follow `docs/azure_teardown_checklist.md` when a live endpoint is no longer required.
+6. Completed: configured GitHub OIDC federation, resource-scoped RBAC and a real read-only OIDC smoke test in Stages 11.5A through 11.5D.
+7. Completed manually: validated the end-to-end deployment workflow, immutable image update, deployed-image query and bounded `/health` check in Stage 11.5E.
+8. Next: enable and validate automatic deployment from `main` while keeping pull request workflows non-deploying.
+9. Later: collect final portfolio evidence and follow `docs/azure_teardown_checklist.md` when a live endpoint is no longer required.
