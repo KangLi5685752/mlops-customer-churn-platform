@@ -2,7 +2,7 @@
 
 ## Status
 
-This document began as the Stage 11.0 cloud deployment plan and guardrails. It now also records the validated Stage 11.2 through 11.5E cloud-hosted portfolio deployment evidence.
+This document began as the Stage 11.0 cloud deployment plan and guardrails. It now also records the validated Stage 11.2 through 11.6 cloud-hosted portfolio deployment and benchmark evidence.
 
 The Azure resource group `rg-mlops-churn-portfolio` was created with UK South as its resource-group location. The Azure workload resources were deployed in Sweden Central because the Azure for Students subscription region policy prevented the originally intended UK South deployment. The project remains a cost-controlled portfolio cloud deployment MVP, not a production deployment.
 
@@ -79,7 +79,20 @@ The workload resource names were validated during manual deployment. The GitHub 
 - It built and pushed immutable image tag `b613f29250c3` from source commit `b613f29250c3b4c14b54a4c5a7a7a39579effaca`, with digest `sha256:10d9aab1516f80e0c54edd05cb6410efb7d8a7a341c85ee7270b97f3aaa1805a`.
 - It recorded previous tag `fcd471855395`, updated only the Container App image and independently verified that Azure reported the new immutable image reference.
 - The bounded HTTPS `/health` smoke test passed on attempt 2 with `status: ok` and `model_artifact_exists: true`; the first timeout accommodated revision startup and was not an outage.
-- The workflow remains manual-only through `workflow_dispatch`. Automatic deployment from `main` is not yet enabled or validated.
+- Stage 11.5F enabled and validated automatic deployment for deployment-relevant pushes to `main`, while preserving manual dispatch.
+- Stage 11.5G added PR Docker build validation after pytest and verified artifact retrieval; PR workflows do not authenticate to Azure, push images or deploy.
+- Stage 11.5 is complete.
+
+### Stage 11.6: Azure-Hosted Latency Evidence
+
+- Added a separate Azure-hosted benchmark harness and separate report paths so local benchmark evidence remains unchanged.
+- Executed the benchmark from a local workstation over public HTTPS using sequential synthetic `/predict` requests.
+- Readiness passed on bounded attempt 2, followed by 5 successful unmeasured warm-up requests; neither readiness nor warm-up was included in prediction latency statistics.
+- Measured 100 requests with 100 successes and 0 failures.
+- Recorded `56.947 ms` average, `55.676 ms` p50, `61.961 ms` p95, `53.788 ms` minimum and `98.342 ms` maximum client-observed end-to-end latency.
+- The result may include workstation handling, public networking, HTTPS transport, Container Apps ingress, application handling, preprocessing, model inference and response transmission.
+- This is not pure model inference latency, production traffic, a load or stress test, an SLA measurement or a production performance benchmark.
+- Stage 11.6 is complete.
 
 ## Cost Guardrails
 
@@ -119,7 +132,6 @@ Before every Docker build on a clean runner, the pinned release asset must be do
 
 The Stage 11 cloud MVP does not include:
 
-- automatic deployment from `main` until it is separately enabled and validated;
 - changes to the Docker application or model workflow;
 - Terraform or Bicep;
 - Kubernetes or AKS;
@@ -136,5 +148,7 @@ The Stage 11 cloud MVP does not include:
 5. Completed manually: validated live and persistent Container Apps logs through Log Analytics in Stage 11.4.
 6. Completed: configured GitHub OIDC federation, resource-scoped RBAC and a real read-only OIDC smoke test in Stages 11.5A through 11.5D.
 7. Completed manually: validated the end-to-end deployment workflow, immutable image update, deployed-image query and bounded `/health` check in Stage 11.5E.
-8. Next: enable and validate automatic deployment from `main` while keeping pull request workflows non-deploying.
-9. Later: collect final portfolio evidence and follow `docs/azure_teardown_checklist.md` when a live endpoint is no longer required.
+8. Completed: enabled and validated automatic deployment from `main` for deployment-relevant changes, with cloud-write-free PR Docker validation.
+9. Completed: recorded separate Azure-hosted client-observed latency evidence in Stage 11.6.
+10. Next: package portfolio, CV, LinkedIn and interview evidence in Stage 11.7.
+11. Later: follow `docs/azure_teardown_checklist.md` when a live endpoint is no longer required.

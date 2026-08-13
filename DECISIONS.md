@@ -210,8 +210,14 @@ Decision: Grant `Container Registry Configuration Reader and Data Access Configu
 
 Reason: A validation run showed that `AcrPush` alone did not allow `az acr login --expose-token` to resolve the registry configuration for the non-default login server. The additional read role corrected that specific requirement without broadening access beyond the ACR resource.
 
-## 2026-08-13: Deploy immutable images with independent verification
+## 2026-08-13: Validate deployment manually before enabling main-triggered deployment
 
-Decision: Use the manual-only GitHub Actions deployment workflow to retrieve and verify the pinned model artifact, build and push a Git-SHA-tagged image, update only the existing Container App image, query Azure to confirm the deployed image and validate the `/health` JSON contract with bounded retries.
+Decision: First validate the GitHub Actions deployment workflow manually, then enable the same validated chain for deployment-relevant pushes to `main` while keeping pull requests cloud-write-free.
 
-Reason: The first successful end-to-end run demonstrated artifact integrity verification, immutable image traceability, OIDC federated authentication, temporary ACR authentication and post-deployment checks without training in CI, committing the model artifact, enabling the ACR admin account or adding automatic rollback. Automatic deployment from `main` remains a separate validation step.
+Reason: The staged approach demonstrated artifact integrity verification, immutable image traceability, OIDC federated authentication, temporary ACR authentication and post-deployment checks before enabling automatic deployment. Pull requests now validate pytest, artifact retrieval and Docker build without Azure authentication or deployment.
+
+## 2026-08-13: Keep Azure-hosted latency evidence separate from local latency evidence
+
+Decision: Use a dedicated Azure-hosted benchmark harness and separate JSON and Markdown reports, with readiness and warm-up requests excluded from measured prediction latency.
+
+Reason: The hosted result is client-observed end-to-end latency over public HTTPS, while the existing local benchmark has a different environment and measurement boundary. Keeping the evidence separate prevents overwriting historical local results and avoids mislabeling the difference as Azure overhead or pure model inference latency.

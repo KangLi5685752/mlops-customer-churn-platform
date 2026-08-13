@@ -228,7 +228,7 @@ GitHub Actions runs the pytest suite on every push and pull request using Python
 
 The CI workflow installs dependencies from `requirements.txt` and runs `python -m pytest`. These tests use synthetic data and mocked API model loading where appropriate, so CI does not require the raw Telco CSV file or a committed `artifacts/model_pipeline.joblib` file.
 
-The separate Azure deployment workflow currently runs only through manual `workflow_dispatch`. It retrieves and verifies the pinned model artifact, runs pytest, builds an immutable Git-SHA-tagged image, authenticates to Azure through OIDC federation without long-lived Azure client secrets, pushes to ACR, updates only the existing Container App image, verifies the configured image and performs a bounded `/health` smoke test. Automatic deployment from `main` has not yet been enabled.
+Pull requests run pytest, retrieve and verify the pinned model artifact, and validate the Docker build without Azure authentication or deployment. Deployment-relevant pushes to `main` run the validated Azure deployment workflow automatically; manual `workflow_dispatch` remains available. The deployment workflow builds an immutable Git-SHA-tagged image, authenticates through OIDC federation without long-lived Azure client secrets, pushes to ACR, updates only the existing Container App image, verifies the configured image and performs a bounded `/health` smoke test.
 
 ## Run the FastAPI App
 
@@ -330,6 +330,19 @@ reports/api_latency_benchmark.md
 ```
 
 These are local benchmark results based on synthetic requests. They are not production performance results or evidence of production deployment.
+
+## Azure-Hosted API Latency Benchmark
+
+The Azure-hosted FastAPI `/predict` endpoint was benchmarked from a local workstation over 100 sequential synthetic requests after readiness validation and 5 successful unmeasured warm-up requests. All 100 measured requests succeeded.
+
+| Environment | Successful requests | Average | p50 | p95 |
+| --- | ---: | ---: | ---: | ---: |
+| Local API | 100/100 | 9.815 ms | 9.376 ms | 12.205 ms |
+| Azure-hosted API | 100/100 | 56.947 ms | 55.676 ms | 61.961 ms |
+
+The Azure-hosted minimum was `53.788 ms` and maximum was `98.342 ms`. Its readiness check required a second bounded attempt before measurement; readiness and warm-up requests were excluded from latency statistics.
+
+The hosted result measures client-observed end-to-end latency and may include workstation handling, public network latency, HTTPS transport, Azure Container Apps ingress, FastAPI handling, preprocessing, model inference and response transmission. The local and hosted measurements have different environments and boundaries, so their difference must not be interpreted as Azure overhead. This is synthetic portfolio evidence, not production traffic, a load or stress test, pure model inference latency, an SLA measurement or proof of production scalability.
 
 ## Simulated Drift Detection
 
@@ -442,7 +455,7 @@ Stage 11.5 validated GitHub Actions deployment through the federated user-assign
 
 The first successful manual end-to-end run used source commit `b613f29250c3b4c14b54a4c5a7a7a39579effaca` and pushed immutable image `acrmlopschurnkl5685752-ddhkccgxcecpfjb6.azurecr.io/mlops-churn-api:b613f29250c3` with digest `sha256:10d9aab1516f80e0c54edd05cb6410efb7d8a7a341c85ee7270b97f3aaa1805a`. The workflow downloaded and verified the pinned model artifact before Docker build, passed 34 tests, updated the Container App from tag `fcd471855395`, independently confirmed the new deployed image and passed the `/health` contract on attempt 2 after one startup timeout.
 
-This is validated manual GitHub Actions deployment for a cloud-hosted portfolio deployment. It is not production traffic, a production SLA or a real customer workload. The workflow remains `workflow_dispatch` only; automatic deployment from `main` is the next Stage 11.5 task.
+This is validated GitHub Actions CI/CD for a cloud-hosted portfolio deployment. Deployment-relevant pushes to `main` deploy automatically, and manual dispatch remains supported. Pull requests never authenticate to Azure or deploy. This is not production traffic, a production SLA or a real customer workload.
 
 ## Implemented MLOps Components
 
@@ -497,6 +510,8 @@ Generated evidence files, after running the relevant local commands:
 - `reports/sample_prediction_traffic_summary.md`
 - `reports/api_latency_benchmark.json`
 - `reports/api_latency_benchmark.md`
+- `reports/azure_api_latency_benchmark.json`
+- `reports/azure_api_latency_benchmark.md`
 - `reports/drift_detection_results.json`
 - `reports/drift_detection_summary.md`
 - `reports/model_card.md`
@@ -522,6 +537,7 @@ Additional local evidence to capture manually:
 - SHA-256-verified model artifact retrieval before container build.
 - Immutable Git-SHA-tagged ACR images with deployed-image verification and a bounded health smoke test.
 - Resource-scoped Azure RBAC and Azure Log Analytics observability.
+- 100/100 successful hosted synthetic prediction requests with `61.961 ms` p95 client-observed end-to-end latency.
 - Local MLflow experiment tracking.
 - Local JSONL prediction logging.
 - Synthetic sample prediction traffic generation.

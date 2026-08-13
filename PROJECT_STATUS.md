@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Stage 11.5E manual end-to-end GitHub Actions deployment validated successfully.
+Stage 11.6 Azure-hosted API latency benchmark and evidence sync completed.
 
 ## Stage 11.5 Status
 
@@ -11,7 +11,21 @@ Stage 11.5E manual end-to-end GitHub Actions deployment validated successfully.
 - Stage 11.5C: resource-scoped Azure RBAC completed with narrowly scoped registry and Container Apps permissions.
 - Stage 11.5D: real OIDC login and Azure read-access smoke test completed.
 - Stage 11.5E: manual end-to-end deployment through `.github/workflows/azure-deploy.yml` validated successfully.
-- Stage 11.5 remains open until automatic deployment from `main` is enabled and validated.
+- Stage 11.5F: automatic deployment from `main` for deployment-relevant changes completed and validated.
+- Stage 11.5G: pull-request Docker build validation completed without Azure authentication or deployment.
+- Stage 11.5 is complete.
+
+## Stage 11.6 Completion
+
+- Stage 11.6A: added a dedicated Azure-hosted synthetic API latency benchmark harness.
+- Stage 11.6B: completed the real hosted benchmark from a local workstation over public HTTPS.
+- Stage 11.6C: reviewed and recorded the generated JSON and Markdown evidence.
+- Readiness required a second bounded attempt; readiness latency was excluded from prediction latency statistics.
+- Completed 5 successful unmeasured warm-up requests before measurement.
+- Completed 100 sequential synthetic `/predict` requests with 100 successes and 0 failures.
+- Recorded client-observed end-to-end latency of `56.947 ms` average, `55.676 ms` p50, `61.961 ms` p95, `53.788 ms` minimum and `98.342 ms` maximum.
+- Results are stored in `reports/azure_api_latency_benchmark.json` and `reports/azure_api_latency_benchmark.md`.
+- This is portfolio benchmark evidence, not production traffic, a load or stress test, pure model inference latency, or an SLA measurement.
 
 ## Stage 11.5E Validation
 
@@ -23,7 +37,7 @@ Stage 11.5E manual end-to-end GitHub Actions deployment validated successfully.
 - Updated the existing Container App from image tag `fcd471855395` to `b613f29250c3`, then independently queried Azure and confirmed the configured image matched.
 - Used OIDC federated authentication without long-lived Azure client secrets and a temporary masked ACR token without enabling the ACR admin account.
 - The bounded post-deployment `/health` check accommodated revision startup and passed on attempt 2 with `status: ok` and `model_artifact_exists: true`; the first timeout was not treated as an outage.
-- The workflow remains `workflow_dispatch` only. Automatic deployment from `main` is not yet implemented.
+- The validated workflow was subsequently enabled and validated for deployment-relevant pushes to `main`, while retaining manual dispatch support.
 
 ## Stage 11.2 Completion
 
@@ -222,7 +236,7 @@ Stage 11.5E manual end-to-end GitHub Actions deployment validated successfully.
 
 ## Next Planned Task
 
-Enable and validate automatic deployment from `main` using the already validated deployment workflow. Pull request workflows must remain non-deploying.
+Stage 11.7: package the validated portfolio, CV, LinkedIn and interview evidence without expanding the deployed infrastructure.
 
 ## Known Risks
 
@@ -232,12 +246,12 @@ Enable and validate automatic deployment from `main` using the already validated
 - Drift monitoring in this portfolio project will be simulated rather than based on live production data.
 - Scope could expand too quickly if cloud deployment, Kubernetes or streaming systems are added too early.
 - Baseline metrics may change if the dataset version or preprocessing assumptions change.
-- The deployment workflow currently requires manual dispatch; automatic deployment from `main` has not yet been validated.
 - A non-blocking Azure CLI version-parsing warning was observed in the successful run and did not prevent login, image push, deployment verification or health validation.
+- Hosted latency results depend on workstation location, public network conditions and Azure runtime state and must not be treated as an SLA or pure inference measurement.
 
 ## Current Status Summary
 
-The local MLOps workflow is complete. Stages 11.2 through 11.4 validated ACR, the cloud-hosted portfolio API and Log Analytics evidence. Stage 11.5 has now validated GitHub OIDC federation without long-lived Azure client secrets, resource-scoped RBAC and a manually dispatched end-to-end deployment using an immutable Git-SHA image. Stage 11.5 remains open because automatic deployment from `main` has not yet been enabled or validated.
+The local MLOps workflow and Azure cloud-hosted portfolio deployment are validated. Stage 11.5 is complete with pytest CI, PR Docker build validation, main-triggered deployment, OIDC federation without long-lived Azure client secrets, resource-scoped RBAC, immutable Git-SHA images and post-deployment health validation. Stage 11.6 is complete with separate Azure-hosted latency evidence from 100 sequential synthetic requests.
 
 ## Project Evidence and Validation Artifacts to Collect
 
@@ -258,6 +272,7 @@ The local MLOps workflow is complete. Stages 11.2 through 11.4 validated ACR, th
 - Azure Container Apps live and persistent Log Analytics query evidence.
 - GitHub Actions OIDC smoke-test evidence.
 - Manual deployment run evidence for artifact verification, immutable image push, deployed-image confirmation and the successful bounded `/health` check.
+- Azure-hosted latency evidence from `reports/azure_api_latency_benchmark.json` and `reports/azure_api_latency_benchmark.md`.
 
 ## Milestone Log
 
@@ -286,3 +301,5 @@ The local MLOps workflow is complete. Stages 11.2 through 11.4 validated ACR, th
 - 2026-08-13: Completed Stage 11.4 live and persistent Azure Container Apps log validation through Log Analytics.
 - 2026-08-13: Completed Stage 11.5A through 11.5D identity, federation, resource-scoped RBAC and real OIDC smoke validation.
 - 2026-08-13: Validated the Stage 11.5E manual end-to-end GitHub Actions deployment of immutable image tag `b613f29250c3`, including post-deployment image and health checks.
+- 2026-08-13: Completed Stage 11.5 with PR Docker build validation and validated automatic deployment from `main` for deployment-relevant changes.
+- 2026-08-13: Completed Stage 11.6 Azure-hosted latency benchmarking with 100/100 successful sequential synthetic requests and `61.961 ms` p95 client-observed end-to-end latency.
