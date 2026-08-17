@@ -10,19 +10,21 @@
 - Preprocessing: numeric imputation, numeric scaling and one-hot encoding for categorical features
 - Artifact: `artifacts/model_pipeline.joblib`
 - Serving interface: FastAPI `POST /predict`
-- Monitoring support: local prediction logs, simulated drift detection and Streamlit dashboard
+- Local monitoring support: prediction logs, simulated drift detection and Streamlit dashboard
+- Cloud serving evidence: portfolio deployment of the FastAPI inference service to Azure Container Apps
+- Cloud observability evidence: Azure Container Apps runtime logs queried through Azure Log Analytics
 
 The saved artifact contains the full scikit-learn preprocessing and LogisticRegression pipeline.
 
 ## Intended Use
 
-This model is intended for a local portfolio MLOps prototype. It demonstrates reproducible ML training, API serving, CI, Docker, local MLflow experiment tracking, prediction logging, simulated drift detection and dashboarding.
+This model supports a portfolio ML engineering system demonstrating reproducible training, API serving, containerisation, local monitoring and cloud-hosted inference. The fitted model and preprocessing pipeline are served through the same FastAPI interface locally, in Docker and in the validated Azure Container Apps portfolio deployment.
 
-The model estimates customer churn risk as decision support. It should not automatically determine customer treatment.
+The model estimates customer churn risk as decision support. It should not automatically determine customer treatment, and the cloud-hosted validation does not establish production suitability or business impact.
 
 ## Not Intended For
 
-- Real production deployment.
+- Real production customer workloads or SLA-backed serving.
 - Automatic customer retention decisions.
 - Use with real customer data without further privacy, security, fairness and performance validation.
 - Use as a validated business retention policy.
@@ -97,7 +99,15 @@ Risk label rule:
 
 This threshold rule is a local demonstration rule, not a validated business policy.
 
-## Monitoring and Drift
+## Serving and Deployment
+
+The saved preprocessing and LogisticRegression pipeline is loaded by the FastAPI inference service and packaged in Docker without retraining inside the serving image. The same inference service has been validated as a portfolio cloud-hosted deployment on Azure Container Apps through Azure Container Registry.
+
+This deployment evidence confirms cloud-hosted inference for synthetic requests. It is not a production customer workload, production traffic, a production SLA or evidence of real customer impact.
+
+## Monitoring and Observability
+
+### Local Monitoring
 
 Successful local API predictions are logged to:
 
@@ -108,6 +118,12 @@ logs/predictions.jsonl
 Sample prediction traffic is synthetic. Simulated drift detection compares reference prediction logs with a deterministic shifted current batch. Drift thresholds are simple demonstration thresholds.
 
 The Streamlit dashboard visualises local prediction logs and simulated drift results. This is not live production monitoring.
+
+### Cloud Observability
+
+Azure Container Apps and Azure Log Analytics provided runtime evidence for image pull, container lifecycle, application startup, successful `/health` and `/docs` requests, and a successful synthetic `/predict` request. This platform-log validation is separate from the local prediction logging, simulated drift workflow and Streamlit dashboard.
+
+The project does not claim production model-performance monitoring, production drift detection, automated alerting or an SLA-backed observability service.
 
 ## Ethical and Responsible Use Considerations
 
@@ -123,8 +139,8 @@ Privacy considerations matter if this project is adapted to real data. Local pre
 - No real production traffic.
 - No ground-truth labels for simulated prediction logs.
 - Simulated drift only.
-- No cloud deployment.
-- No live monitoring or alerting.
+- Azure deployment is a portfolio cloud-hosted validation, not a production customer workload or SLA-backed service.
+- No production model-performance monitoring or automated alerting.
 - No validated economic impact.
 - No model registry or production governance workflow.
 
@@ -132,8 +148,7 @@ Privacy considerations matter if this project is adapted to real data. Local pre
 
 - Add subgroup performance analysis.
 - Add threshold analysis.
-- Add API latency benchmark.
 - Add stronger drift metrics if needed.
 - Add model comparison with tree-based baselines.
-- Improve dashboard screenshots and project evidence.
-- Finalise CV, LinkedIn and interview STAR story wording.
+- Add richer monitoring and alerting if the project scope later requires it.
+- Add infrastructure as code if repeatable cloud provisioning becomes a future objective.
