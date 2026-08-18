@@ -1,577 +1,254 @@
-﻿# MLOps Customer Churn Prediction & Drift Monitoring Platform
+# MLOps Customer Churn Prediction & Drift Monitoring Platform
 
-## Short Overview
+End-to-end ML engineering project taking a scikit-learn churn model from reproducible training to a verified model release, containerised FastAPI serving, automated Azure deployment and monitoring evidence.
 
-This project turns a notebook-based customer churn prediction baseline into a reproducible, testable, containerised and monitored ML service prototype. It is designed as a portfolio-grade MLOps project that shows how an experimentation-stage machine learning workflow can be moved toward production-style engineering practices and a small cloud-hosted portfolio deployment.
+This is a portfolio cloud-hosted deployment built with public data, synthetic monitoring traffic and synthetic benchmark requests. It is not a real customer system or an SLA-backed service.
 
-The project includes manually validated Azure hosting for portfolio evidence. It is not a production deployment and does not claim production traffic, a production SLA, real business impact, real company deployment or real customer retention improvement.
+[![CI](https://github.com/KangLi5685752/mlops-customer-churn-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/KangLi5685752/mlops-customer-churn-platform/actions/workflows/ci.yml)
+[![Azure Deployment](https://github.com/KangLi5685752/mlops-customer-churn-platform/actions/workflows/azure-deploy.yml/badge.svg)](https://github.com/KangLi5685752/mlops-customer-churn-platform/actions/workflows/azure-deploy.yml)
 
-## Project Architecture
+[`Python`](https://www.python.org/) · [`scikit-learn`](https://scikit-learn.org/) · [`FastAPI`](https://fastapi.tiangolo.com/) · [`Docker`](https://www.docker.com/) · [`MLflow`](https://mlflow.org/) · [`GitHub Actions`](https://github.com/features/actions) · [`Azure Container Apps`](https://azure.microsoft.com/products/container-apps) · [`Azure Container Registry`](https://azure.microsoft.com/products/container-registry)
 
-The local workflow follows this path:
+[CI workflow](.github/workflows/ci.yml) · [Azure deployment workflow](.github/workflows/azure-deploy.yml) · [Model release `v1.0.0`](https://github.com/KangLi5685752/mlops-customer-churn-platform/releases/tag/model-v1.0.0) · [Model card](reports/model_card.md) · [Decision log](DECISIONS.md)
+
+## Key Outcomes
+
+| Model quality | Engineering quality | Hosted API evidence | Cloud delivery |
+| --- | --- | --- | --- |
+| **0.842** held-out ROC-AUC | **42** automated tests passing | **100/100** synthetic requests, **62.0 ms p95** | OIDC-based CI/CD to Azure Container Apps |
+
+Hosted latency is client-observed end-to-end public-HTTPS evidence, not pure model inference latency or an SLA measurement.
+
+## Architecture
+
+```mermaid
+flowchart TB
+    subgraph Training["Local training"]
+        DATA["Telco CSV<br/>excluded from Git"] --> TRAIN["Preprocessing + LogisticRegression"]
+        TRAIN --> MLFLOW["Local MLflow"]
+        TRAIN --> ARTIFACT["model_pipeline.joblib<br/>excluded from Git"]
+    end
+
+    subgraph Delivery["Artifact delivery"]
+        ARTIFACT --> RELEASE["GitHub Release<br/>model-v1.0.0"]
+        RELEASE --> VERIFY["Temporary download<br/>+ SHA-256 verification"]
+    end
+
+    subgraph PR["Pull request"]
+        PRSTART["PR"] --> PRTEST["pytest"]
+        PRTEST --> PRVERIFY["Verified artifact retrieval"]
+        PRVERIFY --> PRBUILD["Docker build"]
+        PRBUILD --> STOP["Stop: no Azure auth<br/>and no deployment"]
+    end
+
+    RELEASE --> PRVERIFY
+
+    subgraph CD["Deployment-relevant push to main"]
+        MAIN["Push to main"] --> CDTEST["pytest"]
+        CDTEST --> CDVERIFY["Verified artifact retrieval"]
+        CDVERIFY --> BUILD["Git-SHA Docker image"]
+        BUILD --> OIDC["GitHub OIDC"]
+        OIDC --> ACR["Azure Container Registry"]
+        ACR --> ACA["Azure Container Apps"]
+        ACA --> CHECKS["Image verification<br/>+ bounded /health check"]
+    end
+
+    RELEASE --> CDVERIFY
+
+    subgraph Monitoring["Local ML monitoring"]
+        LOCALAPI["FastAPI predictions"] --> LOGS["JSONL prediction logs"]
+        LOGS --> DRIFT["Simulated drift"]
+        DRIFT --> DASH["Local Streamlit dashboard"]
+    end
+
+    subgraph Observability["Azure runtime observability"]
+        ACA --> APPLOGS["Container + application logs"]
+        APPLOGS --> LA["Azure Log Analytics"]
+    end
+```
+
+MLflow, prediction logging, simulated drift and Streamlit run locally. Azure hosts the FastAPI container and runtime logs; the raw dataset is not present in the runtime image. A polished reusable architecture graphic is planned as a later portfolio asset.
+
+[Detailed architecture and execution boundaries](docs/architecture.md)
+
+## What Was Built
+
+- **Reproducible ML training:** reusable [data](src/data/), [preprocessing](src/features/) and [training/evaluation](src/models/) modules with a fixed held-out split and local MLflow tracking.
+- **Model serving:** [FastAPI application](app/) with Pydantic validation, `GET /health` and `POST /predict`.
+- **Testing and containerisation:** 42 pytest tests, Docker packaging and pull-request Docker build validation.
+- **Artifact provenance:** published `model-v1.0.0` release, machine-readable [deployment manifest](deployment/model_artifact.json) and checksum-gated retrieval before installation.
+- **CI/CD:** cloud-write-free pull-request validation plus automated deployment-relevant `main` pushes using OIDC and resource-scoped RBAC.
+- **Monitoring and observability:** local prediction logging, synthetic traffic, simulated drift, a Streamlit dashboard and separate Azure Log Analytics runtime evidence.
+
+## Model Performance
+
+The public Telco Customer Churn dataset contains 7,043 records and 19 model features after removing the identifier and target. Evaluation uses a fixed 1,409-record held-out test split.
+
+| Model | ROC-AUC | Accuracy | Precision | Recall | F1 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| DummyClassifier | 0.5000 | 0.7346 | 0.0000 | 0.0000 | 0.0000 |
+| LogisticRegression | **0.8419** | **0.8055** | **0.6572** | **0.5588** | **0.6040** |
+
+The fitted pipeline improves substantially over the dummy baseline. Accuracy alone is insufficient because churn is imbalanced; recall and precision remain moderate, so false negatives and false positives remain meaningful limitations.
+
+[Model and data details](docs/model_and_data.md) · [Evaluation report](reports/evaluation_summary.md) · [Model card](reports/model_card.md)
+
+## Cloud Deployment and CI/CD
+
+### Pull Requests
 
 ```text
-Raw Telco CSV
--> training pipeline
--> saved model artifact
--> FastAPI inference service
--> prediction logs
--> simulated drift detection
--> Streamlit dashboard
+pytest
+-> pinned artifact retrieval
+-> SHA-256 verification
+-> Docker build
+-> no Azure authentication
+-> no deployment
 ```
 
-MLflow records local training experiment metadata under `mlruns/`. GitHub Actions runs the pytest suite automatically on push and pull request. Docker packages the FastAPI API service using the validated model artifact. The same image has been manually validated through Azure Container Registry and Azure Container Apps as a cloud-hosted portfolio deployment, not a production deployment.
+Pull requests validate code, artifact integrity and container construction without Azure deployment permissions.
 
-## Reproducibility Workflow
-
-From the project root:
-
-1. Install dependencies:
-
-```bash
-python -m pip install -r requirements.txt
-```
-
-2. Add the raw Telco CSV:
+### Main Deployment
 
 ```text
-data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv
+deployment-relevant push to main
+-> pytest
+-> verified artifact retrieval
+-> Docker build
+-> GitHub OIDC login
+-> temporary ACR authentication
+-> immutable Git-SHA image push
+-> Azure Container Apps update
+-> deployed-image verification
+-> bounded HTTPS /health validation
 ```
 
-3. Run tests:
+The deployment workflow uses OIDC federation instead of a long-lived Azure client secret. Access is resource-scoped, and the ACR admin user is not used. Documentation-only and test-only changes do not trigger Azure deployment.
 
-```bash
-python -m pytest
-```
+[CI workflow](.github/workflows/ci.yml) · [Azure deployment workflow](.github/workflows/azure-deploy.yml) · [Azure deployment evidence and guardrails](docs/azure_deployment_plan.md)
 
-4. Train the model:
+## Monitoring and Observability
 
-```bash
-python -m src.models.train
-```
+### Local ML Monitoring
 
-5. Evaluate the model:
+- Successful local predictions append selected fields to a Git-ignored JSONL log.
+- Synthetic traffic exercises the real FastAPI prediction path.
+- Deterministic numerical and categorical shifts produce simulated drift evidence.
+- A local Streamlit dashboard presents prediction summaries and drift tables.
 
-```bash
-python -m src.models.evaluate
-```
+### Azure Runtime Observability
 
-6. Start the API:
+- Azure Container Apps logs confirmed image pull, container creation and application startup.
+- Console logs captured successful `/health`, synthetic `/predict` and `/docs` requests.
+- Persistent runtime evidence was queried through Azure Log Analytics.
 
-```bash
-python -m uvicorn app.main:app --reload
-```
+The local drift workflow is simulated and does not run automatically in Azure. Azure runtime logs do not constitute production model-performance monitoring.
 
-7. Generate sample prediction traffic:
+[Monitoring workflow](docs/monitoring.md) · [Simulated drift report](reports/drift_detection_summary.md)
 
-```bash
-python -m scripts.generate_sample_prediction_traffic --n 30
-```
+## Performance Evidence
 
-8. Run simulated drift detection:
-
-```bash
-python -m scripts.run_simulated_drift_detection
-```
-
-9. Start the dashboard:
-
-```bash
-python -m streamlit run dashboard/streamlit_app.py
-```
-
-10. Optionally run the local API with Docker:
-
-```bash
-docker build -t mlops-customer-churn-api .
-docker run --rm -p 8000:8000 mlops-customer-churn-api
-```
-
-## Real-World Problem Framing
-
-Customer churn prediction is a common machine learning problem in subscription-based businesses such as telecom, SaaS, streaming services and membership platforms. These businesses often want to identify customers who may stop using the service so that support, retention or account teams can review the situation.
-
-A model evaluated only in a notebook is not enough for this type of workflow. In a realistic setting, the model also needs to be reproducible, testable, deployable behind an API and monitorable over time. Input data can change, prediction behaviour can drift and engineering failures can affect how the model is used. This project focuses on demonstrating those MLOps concerns around a churn prediction use case.
-
-## Dataset Choice
-
-The project will use the Telco Customer Churn dataset. The target variable is `Churn`.
-
-The dataset contains customer demographics, service subscription information, account information and billing-related features. The dataset file will not be included in this repository. Raw and processed data folders are included only as placeholders so the project structure is clear.
-
-## Data Setup
-
-1. Download the Telco Customer Churn CSV.
-2. Keep the filename as `WA_Fn-UseC_-Telco-Customer-Churn.csv`.
-3. Place it at `data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv`.
-4. The dataset is intentionally not committed to the repository.
-
-## Prediction Task
-
-The prediction task is binary classification.
-
-Input: customer profile, service and billing features.
-
-Output: churn probability and a churn risk label.
-
-The churn probability will represent the model-estimated likelihood that a customer belongs to the churn class. The risk label will be derived from that probability in a later stage of the project.
-
-## Why This Dataset Is Suitable for an MLOps Portfolio Project
-
-The Telco Customer Churn dataset is suitable for this MLOps prototype because it supports both machine learning experimentation and production-style engineering work.
-
-- Its tabular structure is suitable for scikit-learn pipelines.
-- Categorical and numerical features require preprocessing.
-- Customer-level prediction is suitable for API serving.
-- Incoming customer profiles can be used to simulate production prediction traffic.
-- Features such as `tenure`, `MonthlyCharges` and `Contract` are suitable for simulated drift monitoring.
-
-## Baseline Definition
-
-The initial baseline will be a reasonable notebook/script-based experimentation workflow. It is not intended to be weak or fake. It represents the type of prototype that might exist before MLOps practices are added.
-
-The baseline will include:
-
-- manual data loading
-- preprocessing and model training in a notebook or script
-- held-out test evaluation
-- manual model saving
-
-The baseline will not include:
-
-- API serving
-- Docker packaging
-- automated tests
-- CI
-- prediction logging
-- drift monitoring
-
-
-## Baseline Experiment
-
-The Stage 2 baseline notebook is available at `notebooks/01_baseline_experiment.ipynb`. When run with the local Telco Customer Churn CSV, it trains a `DummyClassifier` sanity-check baseline and a simple `LogisticRegression` baseline using pandas and scikit-learn.
-
-The generated baseline summary is available at `reports/baseline_summary.md` after a successful local notebook run.
-
-
-## Reproducible Training and Evaluation
-
-The exploratory baseline remains in `notebooks/01_baseline_experiment.ipynb`. Reusable workflow code lives under `src/` and can be run from the command line after the dataset is placed at `data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv`.
-
-Train the baseline pipeline:
-
-```bash
-python -m src.models.train
-```
-
-Evaluate the saved pipeline:
-
-```bash
-python -m src.models.evaluate
-```
-
-The training script generates `artifacts/model_pipeline.joblib` locally. This artifact stores the full scikit-learn preprocessing and LogisticRegression pipeline and is intentionally excluded from Git. The evaluation script loads the saved pipeline and evaluates it on the same fixed held-out split used by the baseline workflow.
-
-## Deployment Model Artifact
-
-The deployment manifest at `deployment/model_artifact.json` records the validated artifact provenance, expected runtime path and authoritative SHA-256 checksum. The model artifact remains outside Git so generated binary deployment output is kept separate from source code.
-
-The `model-v1.0.0` release has been published with the `model_pipeline.joblib` asset. GitHub reports the same SHA-256 as the authoritative manifest value. A real GitHub-hosted deployment run used `python -m scripts.fetch_model_artifact` to download the pinned asset to a temporary file, verify its SHA-256 checksum and only then install it at `artifacts/model_pipeline.joblib`. Deployment builds must never load an unverified joblib/pickle artifact. Publishing the release itself did not provision Azure runtime or workload resources.
-
-Runtime compatibility for this validated artifact is protected by pinning `scikit-learn==1.7.2` and `joblib==1.5.3`. The raw training dataset and model artifact both remain excluded from Git.
-
-## MLflow Experiment Tracking
-
-Training runs log parameters, metrics and local artifacts to MLflow.
-
-Run training from the project root:
-
-```bash
-python -m src.models.train
-```
-
-This project uses local file-based MLflow tracking under `mlruns/`. Start the local MLflow UI from the project root with the command for your shell.
-
-Windows CMD:
-
-```cmd
-set "MLFLOW_ALLOW_FILE_STORE=true" && python -m mlflow ui --backend-store-uri ./mlruns
-```
-
-macOS/Linux:
-
-```bash
-MLFLOW_ALLOW_FILE_STORE=true python -m mlflow ui --backend-store-uri ./mlruns
-```
-
-Open:
-
-```text
-http://127.0.0.1:5000
-```
-
-`mlruns/` is excluded from Git. This remains local experiment tracking, not a remote tracking server or model registry.
-
-## Tests
-
-From the project root, run:
-
-```bash
-python -m pytest
-```
-
-The tests include data cleaning, preprocessing, model-pipeline and FastAPI endpoint checks. They use small synthetic inputs and mocked model loading where appropriate, so they do not require the raw Telco CSV file or a committed model artifact.
-
-## Continuous Integration
-
-GitHub Actions runs the pytest suite on every push and pull request using Python 3.10.
-
-The CI workflow installs dependencies from `requirements.txt` and runs `python -m pytest`. These tests use synthetic data and mocked API model loading where appropriate, so CI does not require the raw Telco CSV file or a committed `artifacts/model_pipeline.joblib` file.
-
-Pull requests run pytest, retrieve and verify the pinned model artifact, and validate the Docker build without Azure authentication or deployment. Deployment-relevant pushes to `main` run the validated Azure deployment workflow automatically; manual `workflow_dispatch` remains available. The deployment workflow builds an immutable Git-SHA-tagged image, authenticates through OIDC federation without long-lived Azure client secrets, pushes to ACR, updates only the existing Container App image, verifies the configured image and performs a bounded `/health` smoke test.
-
-## Run the FastAPI App
-
-From the project root, first generate the local model artifact:
-
-```bash
-python -m src.models.train
-```
-
-Then start the API:
-
-```bash
-python -m uvicorn app.main:app --reload
-```
-
-The API loads `artifacts/model_pipeline.joblib`. The artifact is generated locally and excluded from Git. OpenAPI docs are available at:
-
-```text
-http://127.0.0.1:8000/docs
-```
-
-Use `POST /predict` with a Telco customer JSON payload:
-
-```json
-{
-  "gender": "Female",
-  "SeniorCitizen": 0,
-  "Partner": "Yes",
-  "Dependents": "No",
-  "tenure": 12,
-  "PhoneService": "Yes",
-  "MultipleLines": "No",
-  "InternetService": "DSL",
-  "OnlineSecurity": "Yes",
-  "OnlineBackup": "No",
-  "DeviceProtection": "No",
-  "TechSupport": "No",
-  "StreamingTV": "No",
-  "StreamingMovies": "No",
-  "Contract": "Month-to-month",
-  "PaperlessBilling": "Yes",
-  "PaymentMethod": "Electronic check",
-  "MonthlyCharges": 59.9,
-  "TotalCharges": 718.8
-}
-```
-
-## Prediction Logging
-
-Each successful `POST /predict` call appends one JSONL event to `logs/predictions.jsonl`.
-
-Prediction log events include a UTC timestamp, request ID, model artifact path, churn probability, predicted class, risk label and selected monitoring features: `tenure`, `MonthlyCharges`, `TotalCharges`, `Contract`, `InternetService` and `PaymentMethod`.
-
-`logs/predictions.jsonl` is excluded from Git. These local logs are intended for later simulated drift detection and dashboarding. This is local prototype logging, not production observability.
-
-## Generate Sample Prediction Traffic
-
-From the project root, train the model first:
-
-```bash
-python -m src.models.train
-```
-
-Start the FastAPI app:
-
-```bash
-python -m uvicorn app.main:app --reload
-```
-
-In a second terminal, generate synthetic local sample traffic:
-
-```bash
-python -m scripts.generate_sample_prediction_traffic --n 30
-```
-
-Prediction events are appended to `logs/predictions.jsonl`, and a summary is written to `reports/sample_prediction_traffic_summary.md`.
-
-`logs/predictions.jsonl` is excluded from Git. The generated traffic is synthetic local sample traffic intended to support later simulated drift detection and dashboarding. It is not real production traffic.
-
-## Local API Latency Benchmark
-
-Start the FastAPI app first:
-
-```bash
-python -m uvicorn app.main:app --reload
-```
-
-In a second terminal, run the local synthetic benchmark:
-
-```bash
-python -m scripts.benchmark_api_latency --n 100
-```
-
-The benchmark sends sequential synthetic Telco-like requests to `POST /predict` and writes:
-
-```text
-reports/api_latency_benchmark.json
-reports/api_latency_benchmark.md
-```
-
-These are local benchmark results based on synthetic requests. They are not production performance results or evidence of production deployment.
-
-## Azure-Hosted API Latency Benchmark
-
-The Azure-hosted FastAPI `/predict` endpoint was benchmarked from a local workstation over 100 sequential synthetic requests after readiness validation and 5 successful unmeasured warm-up requests. All 100 measured requests succeeded.
+Both benchmarks used 100 sequential synthetic `POST /predict` requests.
 
 | Environment | Successful requests | Average | p50 | p95 |
 | --- | ---: | ---: | ---: | ---: |
 | Local API | 100/100 | 9.815 ms | 9.376 ms | 12.205 ms |
 | Azure-hosted API | 100/100 | 56.947 ms | 55.676 ms | 61.961 ms |
 
-The Azure-hosted minimum was `53.788 ms` and maximum was `98.342 ms`. Its readiness check required a second bounded attempt before measurement; readiness and warm-up requests were excluded from latency statistics.
+The Azure-hosted minimum was 53.788 ms and maximum was 98.342 ms. Measurement began after readiness validation and five successful unmeasured warm-up requests.
 
-The hosted result measures client-observed end-to-end latency and may include workstation handling, public network latency, HTTPS transport, Azure Container Apps ingress, FastAPI handling, preprocessing, model inference and response transmission. The local and hosted measurements have different environments and boundaries, so their difference must not be interpreted as Azure overhead. This is synthetic portfolio evidence, not production traffic, a load or stress test, pure model inference latency, an SLA measurement or proof of production scalability.
+The hosted result is client-observed end-to-end latency and may include workstation handling, public networking, HTTPS, Azure ingress, FastAPI, preprocessing, inference and response transmission. The local and hosted environments have different boundaries, so their difference must not be interpreted as Azure overhead.
 
-## Simulated Drift Detection
+[Local benchmark report](reports/api_latency_benchmark.md) · [Azure-hosted benchmark report](reports/azure_api_latency_benchmark.md)
 
-Generate prediction logs first:
+## Engineering Decisions
 
-```bash
-python -m scripts.generate_sample_prediction_traffic --n 30
-```
+1. **Persist preprocessing with the model.** The saved artifact contains the fitted transformer and `LogisticRegression` pipeline used by inference.
+2. **Keep generated artifacts outside Git.** Deployment retrieves the pinned release asset and verifies SHA-256 before installation or use.
+3. **Keep pull requests cloud-write-free.** PR CI validates pytest, artifact retrieval and Docker build without Azure authentication.
+4. **Use federated deployment identity.** GitHub Actions uses OIDC and resource-scoped RBAC instead of a long-lived Azure client secret.
+5. **Use immutable image references.** Deployment images use Git-SHA tags and the configured Container App image is independently verified.
 
-Run simulated drift detection:
+[Full decision log](DECISIONS.md)
 
-```bash
-python -m scripts.run_simulated_drift_detection
-```
+## Limitations and Responsible Use
 
-Outputs:
+- The dataset is public, static and may not represent current or organisation-specific customer populations.
+- Recall and precision are moderate; predictions can produce both false negatives and false positives.
+- There is no real customer production traffic or validated retention uplift.
+- Prediction traffic, drift inputs and benchmark requests are synthetic.
+- Drift detection uses demonstration thresholds and no ground-truth outcomes.
+- Hosted latency is not a load test, stress test, pure inference benchmark or SLA evidence.
+- Churn scores are decision support and must not automatically determine customer treatment.
 
-```text
-reports/drift_detection_results.json
-reports/drift_detection_summary.md
-```
+[Model card](reports/model_card.md) · [Risk register](reports/risk_register.md)
 
-This workflow uses local prediction logs from `logs/predictions.jsonl`. The current batch is simulated by applying controlled feature shifts, so this is for local MLOps portfolio demonstration and is not real production drift monitoring. `logs/predictions.jsonl` remains excluded from Git.
+## Quickstart
 
-## Streamlit Monitoring Dashboard
+Run commands from the repository root with Python 3.10.
 
-Run the local dashboard workflow from the project root:
+1. Install dependencies:
 
-1. Train the model:
+   ```bash
+   python -m pip install -r requirements.txt
+   ```
 
-```bash
-python -m src.models.train
-```
+2. Place the Git-ignored Telco CSV at:
 
-2. Start the FastAPI app:
+   ```text
+   data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv
+   ```
 
-```bash
-python -m uvicorn app.main:app --reload
-```
+3. Run tests, train and evaluate:
 
-3. In a second terminal, generate sample prediction traffic:
+   ```bash
+   python -m pytest
+   python -m src.models.train
+   python -m src.models.evaluate
+   ```
 
-```bash
-python -m scripts.generate_sample_prediction_traffic --n 30
-```
+4. Start the API:
 
-4. Run simulated drift detection:
+   ```bash
+   python -m uvicorn app.main:app --reload
+   ```
 
-```bash
-python -m scripts.run_simulated_drift_detection
-```
+   Open `http://127.0.0.1:8000/docs`.
 
-5. Start the dashboard:
+5. Build and run the container after the model artifact exists:
 
-```bash
-python -m streamlit run dashboard/streamlit_app.py
-```
+   ```bash
+   docker build -t mlops-customer-churn-api .
+   docker run --rm -p 8000:8000 mlops-customer-churn-api
+   ```
 
-Open the local Streamlit URL shown in the terminal.
+Artifact retrieval, MLflow, API payloads, monitoring commands and CI/CD details are documented in the [MLOps workflow](docs/mlops_workflow.md).
 
-The dashboard reads `logs/predictions.jsonl` and `reports/drift_detection_results.json`. `logs/predictions.jsonl` is excluded from Git. The dashboard is a local prototype, not production monitoring or live alerting.
-
-## Run with Docker
-
-From the project root, generate the local model artifact:
-
-```bash
-python -m src.models.train
-```
-
-Build the Docker image:
-
-```bash
-docker build -t mlops-customer-churn-api .
-```
-
-Run the container:
-
-```bash
-docker run --rm -p 8000:8000 mlops-customer-churn-api
-```
-
-Open:
+## Repository Structure
 
 ```text
-http://127.0.0.1:8000/health
-http://127.0.0.1:8000/docs
+app/                  FastAPI inference service and schemas
+dashboard/            Local Streamlit monitoring dashboard
+deployment/           Versioned model artifact manifest
+docs/                 Architecture and operational documentation
+notebooks/            Baseline experiment
+reports/              Committed model, risk, drift and benchmark evidence
+scripts/              Artifact, traffic, drift and benchmark commands
+src/                  Reusable data, feature, model and monitoring modules
+tests/                Synthetic and mocked pytest coverage
+.github/workflows/    CI, OIDC smoke test and Azure deployment workflows
 ```
 
-The Docker image uses the locally generated `artifacts/model_pipeline.joblib`. The raw dataset is not copied into the image. The Dockerfile does not train the model. This is a local containerised API prototype, not a cloud deployment.
+## Documentation and Evidence
 
-## Azure Deployment Evidence
-
-Stages 11.2 through 11.4 manually validated the existing container image on Azure. Azure workload resources use Sweden Central because the Azure for Students subscription region policy prevented deployment in the originally intended UK South region.
-
-- Azure Container Registry: `acrmlopschurnkl5685752`, Basic SKU.
-- Image: `mlops-churn-api:fcd471855395`.
-- Registry manifest digest: `sha256:db8466a6f629f6fbb3cd270b2b917fd00b7c77d18a8df56d455c5ff634100dde`.
-- Container Apps environment: `cae-mlops-churn`.
-- Container App: `ca-mlops-churn-api`, Consumption workload profile, `0.5 vCPU / 1 GiB`.
-- Ingress: external HTTPS to container port 8000.
-- Registry authentication: managed identity.
-- Log Analytics workspace: `log-mlops-churn`.
-
-Azure-hosted API validation confirmed `GET /health` returned `status: ok` with `model_artifact_exists: true`, `GET /docs` returned HTTP 200, and a synthetic `POST /predict` returned churn probability `0.660990846586016`, prediction `1` and risk label `high`. The cloud prediction matched the previously validated local Docker result for the same synthetic payload.
-
-Live and persistent logs confirmed image pull, container lifecycle, Uvicorn startup and successful health, prediction and docs requests. Persistent queries were validated with `ContainerAppConsoleLogs_CL` and `ContainerAppSystemLogs_CL`. A startup probe warning was followed by successful startup and endpoint responses, so it was not an outage. The Consumption app was observed scaling its replica down after inactivity; this observation does not establish stronger cost or availability guarantees.
-
-Stage 11.5 validated GitHub Actions deployment through the federated user-assigned identity `id-github-mlops-churn`. The OIDC trust is restricted to this repository's `main` branch, and no long-lived Azure client secret or ACR admin credential is used. Azure access uses resource-scoped RBAC with narrowly scoped registry and Container Apps permissions.
-
-The first successful manual end-to-end run used source commit `b613f29250c3b4c14b54a4c5a7a7a39579effaca` and pushed immutable image `acrmlopschurnkl5685752-ddhkccgxcecpfjb6.azurecr.io/mlops-churn-api:b613f29250c3` with digest `sha256:10d9aab1516f80e0c54edd05cb6410efb7d8a7a341c85ee7270b97f3aaa1805a`. The workflow downloaded and verified the pinned model artifact before Docker build, passed 34 tests, updated the Container App from tag `fcd471855395`, independently confirmed the new deployed image and passed the `/health` contract on attempt 2 after one startup timeout.
-
-This is validated GitHub Actions CI/CD for a cloud-hosted portfolio deployment. Deployment-relevant pushes to `main` deploy automatically, and manual dispatch remains supported. Pull requests never authenticate to Azure or deploy. This is not production traffic, a production SLA or a real customer workload.
-
-## Implemented MLOps Components
-
-The planned MLOps components are:
-
-- FastAPI prediction endpoint
-- Pydantic input validation
-- Docker
-- pytest
-- GitHub Actions pytest CI and manually validated Azure deployment workflow
-- MLflow tracking
-- prediction logging
-- synthetic drift detection
-- Streamlit monitoring dashboard
-- model card
-- risk register
-
-## Planned Evaluation
-
-### Model Evaluation
-
-Model performance will be evaluated on held-out test data using:
-
-- ROC-AUC
-- F1
-- precision
-- recall
-- confusion matrix
-
-Baseline model metrics are generated from a local notebook run and summarised in `reports/baseline_summary.md`.
-
-### Engineering and MLOps Evaluation
-
-Engineering and MLOps quality will be evaluated using local benchmarking, tests and generated project evidence such as:
-
-- API average latency
-- API p95 latency
-- number of pytest tests
-- CI pass/fail status
-- number of MLflow experiment runs
-- prediction log generation
-- drift detection output under simulated feature shifts
-
-## Project Evidence
-
-Generated evidence files, after running the relevant local commands:
-
-- `reports/baseline_summary.md`
-- `reports/training_metrics.json`
-- `reports/evaluation_summary.md`
-- `reports/mlflow_run_summary.md`
-- `reports/sample_prediction_traffic_summary.md`
-- `reports/api_latency_benchmark.json`
-- `reports/api_latency_benchmark.md`
-- `reports/azure_api_latency_benchmark.json`
-- `reports/azure_api_latency_benchmark.md`
-- `reports/drift_detection_results.json`
-- `reports/drift_detection_summary.md`
-- `reports/model_card.md`
-- `reports/risk_register.md`
-- `reports/project_evidence_summary.md`
-
-Additional local evidence to capture manually:
-
-- GitHub Actions green run screenshot
-- MLflow UI screenshot
-- FastAPI `/docs` screenshot
-- Streamlit dashboard screenshot
-- Docker build/run terminal output
-
-## What This Project Demonstrates
-
-- Reproducible model training and evaluation with a saved scikit-learn pipeline.
-- Testable data cleaning, preprocessing, model-pipeline and API behaviour.
-- FastAPI model serving with Pydantic request validation.
-- Dockerised local API serving.
-- GitHub Actions CI running `python -m pytest`.
-- GitHub Actions deployment using OIDC federation without long-lived Azure client secrets.
-- SHA-256-verified model artifact retrieval before container build.
-- Immutable Git-SHA-tagged ACR images with deployed-image verification and a bounded health smoke test.
-- Resource-scoped Azure RBAC and Azure Log Analytics observability.
-- 100/100 successful hosted synthetic prediction requests with `61.961 ms` p95 client-observed end-to-end latency.
-- Local MLflow experiment tracking.
-- Local JSONL prediction logging.
-- Synthetic sample prediction traffic generation.
-- Simulated drift detection from local prediction logs.
-- Local Streamlit monitoring dashboard for prediction and drift evidence.
-
-## Out-of-Scope Items for MVP
-
-The MVP will not include:
-
-- production deployment or production traffic
-- Kubernetes
-- complex database architecture
-- real-time streaming infrastructure
-- user authentication
-- enterprise monitoring stack
-- claims of real business impact
-
-## Limitations and Responsible Use Notes
-
-The Telco Customer Churn dataset is small and public, so results from this project should not be treated as evidence of real production performance. The project does not use real customer data, real production traffic or a real customer workload. Azure hosting was manually validated only as a cost-controlled portfolio deployment.
-
-This is not a production deployment and does not provide live production monitoring, a validated business retention policy or an automated customer treatment workflow. Model predictions should support human review rather than automatically decide customer treatment. False positives and false negatives have different business implications. For example, a false positive could lead to unnecessary retention action, while a false negative could miss a customer who may churn.
-
-Prediction traffic is synthetic local sample traffic. Drift detection is simulated, uses simple demonstration thresholds and does not use ground-truth labels. The Streamlit dashboard is a local prototype for portfolio evidence, not production observability or live alerting.
-
-## Development Roadmap
-
-- Stage 1: repository setup and dataset decision
-- Stage 2: baseline notebook and initial metrics
-- Stage 3: refactor training and evaluation into `src`
-- Stage 4: FastAPI prediction service
-- Stage 5: tests, Docker and CI
-- Stage 6: MLflow tracking
-- Stage 7: prediction logging and drift detection
-- Stage 8: Streamlit dashboard
-- Stage 9: model card, risk register and README polish
+- [System architecture](docs/architecture.md)
+- [Model and data](docs/model_and_data.md)
+- [MLOps workflow](docs/mlops_workflow.md)
+- [Monitoring and observability](docs/monitoring.md)
+- [Azure deployment plan and validated evidence](docs/azure_deployment_plan.md)
+- [Azure teardown checklist](docs/azure_teardown_checklist.md)
+- [Model card](reports/model_card.md)
+- [Risk register](reports/risk_register.md)
+- [Local API benchmark](reports/api_latency_benchmark.md)
+- [Azure-hosted API benchmark](reports/azure_api_latency_benchmark.md)
+- [Decision log](DECISIONS.md)
