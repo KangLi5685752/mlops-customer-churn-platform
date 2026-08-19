@@ -21,7 +21,7 @@ MISSING_MODEL_MESSAGE = (
 app = FastAPI(
     title="Telco Customer Churn Prediction API",
     version="0.1.0",
-    description="Local FastAPI app for serving the saved Telco churn model pipeline.",
+    description="FastAPI service for serving the saved Telco churn prediction pipeline.",
 )
 
 
