@@ -1,8 +1,8 @@
 # Simulated Drift Detection Summary
 
-- Timestamp: `2026-07-07T16:11:39.426978+00:00`
-- Reference records: 122
-- Simulated current records: 122
+- Timestamp: `2026-08-19T14:07:26.942839+00:00`
+- Reference records: 123
+- Simulated current records: 123
 - Overall result: Drift detected
 
 The current batch is simulated by applying controlled feature shifts to local prediction logs.
@@ -11,19 +11,19 @@ The current batch is simulated by applying controlled feature shifts to local pr
 
 | Feature | Reference Mean | Current Mean | Difference | Percent Difference | Drift |
 | --- | ---: | ---: | ---: | ---: | --- |
-| tenure | 26.2623 | 20.082 | -6.1803 | -23.53% | True |
-| MonthlyCharges | 59.7029 | 68.1198 | 8.4169 | 14.10% | False |
-| TotalCharges | 1201.2049 | 1038.7666 | -162.4383 | -13.52% | False |
-| churn_probability | 0.3031 | 0.4531 | 0.15 | 49.48% | True |
+| tenure | 26.1463 | 20.1626 | -5.9837 | -22.89% | True |
+| MonthlyCharges | 59.4602 | 68.186 | 8.7259 | 14.68% | False |
+| TotalCharges | 1194.3512 | 1029.7267 | -164.6245 | -13.78% | False |
+| churn_probability | 0.3043 | 0.4543 | 0.15 | 49.29% | True |
 
 ## Categorical Drift
 
 | Feature | Max Proportion Difference | Drift |
 | --- | ---: | --- |
-| Contract | 0.3279 | True |
-| InternetService | 0.459 | True |
+| Contract | 0.3252 | True |
+| InternetService | 0.4634 | True |
 | PaymentMethod | 0.0 | False |
-| risk_label | 0.3361 | True |
+| risk_label | 0.3333 | True |
 
 ## Limitations
 
