@@ -125,6 +125,18 @@ deployment-relevant push to main
 
 The deployment workflow uses OIDC federation instead of a long-lived Azure client secret. Access is resource-scoped, and the ACR admin user is not used. Documentation-only and test-only changes do not trigger Azure deployment.
 
+**Azure-hosted inference validation.** A synthetic Telco request executed through the FastAPI `/predict` interface returned HTTP 200 with churn probability, binary prediction and risk label.
+
+<p align="center">
+  <img src="docs/assets/hosted-api-prediction-preview.png" alt="Azure-hosted FastAPI POST predict request returning HTTP 200" width="700">
+</p>
+
+**Validated Azure deployment workflow.** GitHub Actions tests the project, verifies the pinned model artifact, builds and pushes an immutable image through OIDC-authenticated Azure access, updates Container Apps and validates the hosted health endpoint.
+
+<p align="center">
+  <img src="docs/assets/github-actions-azure-deployment.png" alt="Successful GitHub Actions Azure deployment workflow steps" width="1000">
+</p>
+
 [CI workflow](.github/workflows/ci.yml) · [Azure deployment workflow](.github/workflows/azure-deploy.yml) · [Azure deployment evidence and guardrails](docs/azure_deployment_plan.md)
 
 ## Monitoring and Observability
@@ -136,11 +148,23 @@ The deployment workflow uses OIDC federation instead of a long-lived Azure clien
 - Deterministic numerical and categorical shifts produce simulated drift evidence.
 - A local Streamlit dashboard presents prediction summaries and drift tables.
 
+**Local simulated drift evidence.** The Streamlit dashboard compares 123 reference records with a deterministic shifted batch and presents numerical and categorical drift flags. This is demonstration monitoring, not production drift monitoring.
+
+<p align="center">
+  <img src="docs/assets/streamlit-monitoring-dashboard.png" alt="Streamlit simulated drift monitoring dashboard" width="1000">
+</p>
+
 ### Azure Runtime Observability
 
 - Azure Container Apps logs confirmed image pull, container creation and application startup.
 - Console logs captured successful `/health`, synthetic `/predict` and `/docs` requests.
 - Persistent runtime evidence was queried through Azure Log Analytics.
+
+**Azure runtime observability.** A Log Analytics KQL query over `ContainerAppConsoleLogs_CL` returned successful HTTP 200 entries for `/health`, `/docs` and synthetic `/predict` requests from the hosted Container App.
+
+<p align="center">
+  <img src="docs/assets/azure-log-analytics-requests.png" alt="Azure Log Analytics query showing successful Container Apps HTTP requests" width="1100">
+</p>
 
 The local drift workflow is simulated and does not run automatically in Azure. Azure runtime logs do not constitute production model-performance monitoring.
 
